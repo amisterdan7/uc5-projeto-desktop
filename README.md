@@ -1,34 +1,63 @@
-# 0
+# Academia MisterFit
 
-A minimal Electron application with TypeScript
+Aplicação desktop de controle de academia, feita com Electron, TypeScript e
+PostgreSQL. Projeto Integrador individual da UC5 (Desenvolver Aplicações
+Desktop).
 
-## Recommended IDE Setup
+## Funcionalidades
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+- Cadastro de alunos
+- Cadastro de planos
+- Matrícula de alunos em planos, com cálculo automático da data de término
+- Listagem de alunos com plano vencido
 
-## Project Setup
+## Tecnologias
 
-### Install
+- Electron + Vite + TypeScript
+- HTML/CSS
+- PostgreSQL (via driver `pg`)
 
-```bash
-$ npm install
-```
+## Como rodar
 
-### Development
+\`\`\`bash
+git clone https://github.com/amisterdan7/uc5-projeto-desktop.git
+cd uc5-projeto-desktop
+npm install
+npm run dev
+\`\`\`
 
-```bash
-$ npm run dev
-```
+## Instalador
 
-### Build
+O instalador (.exe) está disponível na aba [Releases](../../releases).
 
-```bash
-# For windows
-$ npm run build:win
+# Academia MisterFit
 
-# For macOS
-$ npm run build:mac
+Aplicação desktop de controle de academia, feita com Electron, TypeScript e
+PostgreSQL. Projeto Integrador individual da UC5 (Desenvolver Aplicações
+Desktop).
 
-# For Linux
-$ npm run build:linux
-```
+## Funcionalidades
+
+- Cadastro de alunos
+- Cadastro de planos
+- Matrícula de alunos em planos, com cálculo automático da data de término
+- Listagem de alunos com plano vencido
+
+## Tecnologias
+
+- Electron + Vite + TypeScript
+- HTML/CSS
+- PostgreSQL (via driver `pg`)
+
+## Como rodar
+
+\`\`\`bash
+git clone https://github.com/amisterdan7/uc5-projeto-desktop.git
+cd uc5-projeto-desktop
+npm install
+npm run dev
+\`\`\`
+
+## Instalador
+
+O instalador (.exe) está disponível na aba [Releases](../../releases).

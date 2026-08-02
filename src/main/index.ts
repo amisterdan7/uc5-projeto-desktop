@@ -2,6 +2,8 @@ import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { testConnection } from './db/connection'
+import { listarTabelas } from './db/alunos.repository'
 
 function createWindow(): void {
   // Create the browser window.
@@ -77,6 +79,17 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  ipcMain.handle('db:test-connection', async () => {
+    return testConnection()
+  })
+
+  ipcMain.handle('db:listar-tabelas', async () => {
+    try {
+      return { success: true, data: await listarTabelas() }
+    } catch (error) {
+      return { success: false, error: (error as Error).message }
+    }
+  })
   ipcMain.on('ping', () => console.log('pong'))
 
   buildMenu()

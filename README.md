@@ -1,31 +1,34 @@
-# Academia MisterFit
+# 0
 
-Aplicação desktop de controle de academia, feita com Electron, TypeScript e
-PostgreSQL. Projeto Integrador individual da UC5 (Desenvolver Aplicações
-Desktop).
+A minimal Electron application with TypeScript
 
-## Funcionalidades
+## Recommended IDE Setup
 
-- Cadastro de alunos
-- Cadastro de planos
-- Matrícula de alunos em planos, com cálculo automático da data de término
-- Listagem de alunos com plano vencido
+- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 
-## Tecnologias
+## Project Setup
 
-- Electron + Vite + TypeScript
-- HTML/CSS
-- PostgreSQL (via driver `pg`)
+### Install
 
-## Como rodar
+```bash
+$ npm install
+```
 
-\`\`\`bash
-git clone https://github.com/amisterdan7/uc5-projeto-desktop.git
-cd uc5-projeto-desktop
-npm install
-npm run dev
-\`\`\`
+### Development
 
-## Instalador
+```bash
+$ npm run dev
+```
 
-O instalador (.exe) está disponível na aba [Releases](../../releases).
+### Build
+
+```bash
+# For windows
+$ npm run build:win
+
+# For macOS
+$ npm run build:mac
+
+# For Linux
+$ npm run build:linux
+```

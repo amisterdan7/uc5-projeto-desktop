@@ -3,7 +3,15 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { testConnection } from './db/connection'
-import { listarTabelas } from './db/alunos.repository'
+import { criarAluno, listarAlunos, atualizarAluno, excluirAluno } from './db/alunos_repository'
+import { criarPlano, listarPlanos, atualizarPlano, excluirPlano } from './db/planos_repository'
+import {
+  listarMatriculas,
+  criarMatricula,
+  atualizarStatusMatricula,
+  excluirMatricula
+} from './db/matriculas_repository'
+// import { error } from 'console'
 
 function createWindow(): void {
   // Create the browser window.
@@ -83,14 +91,103 @@ app.whenReady().then(() => {
     return testConnection()
   })
 
-  ipcMain.handle('db:listar-tabelas', async () => {
+  ipcMain.handle('alunos:criar', async (_e, aluno) => {
     try {
-      return { success: true, data: await listarTabelas() }
+      return { success: true, data: await criarAluno(aluno) }
     } catch (error) {
       return { success: false, error: (error as Error).message }
     }
   })
-  ipcMain.on('ping', () => console.log('pong'))
+
+  ipcMain.handle('alunos:listar', async () => {
+    try {
+      return { sucess: true, data: await listarAlunos() }
+    } catch (err) {
+      return { sucess: false, error: (err as Error).message }
+    }
+  })
+
+  ipcMain.handle('alunos:atualizar', async (_e, id, aluno) => {
+    try {
+      return { sucess: true, data: await atualizarAluno(id, aluno) }
+    } catch (error) {
+      return { sucess: false, error: (error as Error).message }
+    }
+  })
+
+  ipcMain.handle('aluno:excluir', async (_e, id) => {
+    try {
+      return { sucess: true, data: await excluirAluno(id) }
+    } catch (error) {
+      return { sucess: false, error: (error as Error).message }
+    }
+  })
+
+  ipcMain.handle('planos:criar', async (_e, plano) => {
+    try {
+      return { sucess: true, data: await criarPlano(plano) }
+    } catch (error) {
+      return { sucess: false, error: (error as Error).message }
+    }
+  })
+
+  ipcMain.handle('planos:listar', async () => {
+    try {
+      return { sucess: true, data: await listarPlanos() }
+    } catch (error) {
+      return { sucess: false, error: (error as Error).message }
+    }
+  })
+
+  ipcMain.handle('planos:atualizar', async (_e, id, plano) => {
+    try {
+      return { sucess: true, data: await atualizarPlano(id, plano) }
+    } catch (error) {
+      return { sucess: false, error: (error as Error).message }
+    }
+  })
+
+  ipcMain.handle('planos:excluir', async (_e, id) => {
+    try {
+      return { sucess: true, data: await excluirPlano(id) }
+    } catch (err) {
+      return { sucess: false, error: (err as Error).message }
+    }
+  })
+
+  ipcMain.handle('matriculas:criar', async (_e, matricula) => {
+    try {
+      return { sucess: true, data: await criarMatricula(matricula) }
+    } catch (err) {
+      return { sucess: false, error: (err as Error).message }
+    }
+  })
+
+  ipcMain.handle('matriculas:listar', async () => {
+    try {
+      return { success: true, data: await listarMatriculas() }
+    } catch (error) {
+      return { success: false, error: (error as Error).message }
+    }
+  })
+
+  ipcMain.handle('matriculas:atualizar-status', async (_e, id, status) => {
+    try {
+      await atualizarStatusMatricula(id, status)
+      return { success: true }
+    } catch (error) {
+      return { success: false, error: (error as Error).message }
+    }
+  })
+
+  ipcMain.handle('matriculas:excluir', async (_e, id) => {
+    try {
+      await excluirMatricula(id)
+      return { success: true }
+    } catch (error) {
+      return { success: false, error: (error as Error).message }
+    }
+  })
 
   buildMenu()
   createWindow()

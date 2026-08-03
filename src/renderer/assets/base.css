@@ -1,5 +1,4 @@
 :root {
-
   --mf-black: #121212;
   --mf-black-soft: #1a1a1a;
   --mf-black-mute: #232323;
@@ -66,19 +65,15 @@
 
   --color-text: var(--ev-c-text-1);
 
-
   --color-primary: var(--mf-primary);
   --color-primary-text: var(--mf-primary-text);
   --color-primary-soft: var(--mf-primary-soft);
 
-
   --color-success: var(--mf-success);
   --color-success-text: var(--mf-success-text);
 
-
   --color-warning: var(--mf-warning);
   --color-warning-text: var(--mf-warning-text);
-
 
   --color-info: var(--mf-info);
   --color-info-text: var(--mf-info-text);
@@ -111,18 +106,8 @@ body {
 
 :root {
   --font-sans:
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    sans-serif;
-  --font-mono:
-    'JetBrains Mono',
-    'Menlo',
-    'Lucida Console',
-    monospace;
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Menlo', 'Lucida Console', monospace;
   --font-display: 'Poppins', var(--font-sans);
 }
 

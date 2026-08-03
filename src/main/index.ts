@@ -8,7 +8,7 @@ import { listarTabelas } from './db/alunos.repository'
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    title: 'Controle de Academia',
+    title: 'Academia MisterFit',
     width: 1024,
     height: 700,
     minWidth: 800,

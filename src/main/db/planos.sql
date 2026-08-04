@@ -7,6 +7,5 @@ CREATE TABLE planos (
 );
 
 INSERT INTO planos (nome, preco, duracao_meses) VALUES
-  ('Básico', 79.90, 1),
-  ('Premium', 129.90, 1),
-  ('Anual', 899.90, 12);
+  ('Fit', 69.90, 1),
+  ('Mister', 159.90, 1)

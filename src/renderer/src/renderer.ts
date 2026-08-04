@@ -14,11 +14,18 @@ interface Plano {
   recursos: Recurso[]
 }
 
+type Aluno = { id: number; nome: string; telefone?: string }
+type AppError = { message: string }
+type ApiOk<T> = { success: true; data: T }
+type ApiFail = { success: false; error: AppError }
+type ApiResult<T> = ApiOk<T> | ApiFail
+
 function init(): void {
   window.addEventListener('DOMContentLoaded', () => {
     initNavigation()
     doAThing()
-    testarConexaoBanco()
+    initFormAluno()
+    carregarAlunos()
     renderPlanos([
       {
         id: 1,
@@ -62,33 +69,6 @@ function doAThing(): void {
   ipcHandlerBtn?.addEventListener('click', () => {
     window.electron.ipcRenderer.send('ping')
   })
-}
-
-async function testarConexaoBanco(): Promise<void> {
-  try {
-    const api = window.api as {
-      testConnection: () => Promise<boolean>
-      listarTabelas: () => Promise<{ success: boolean; data?: unknown; error?: unknown }>
-    }
-
-    const conectado = await api.testConnection()
-    console.log('Conexão com banco:', conectado ? 'OK' : 'falhou')
-
-    if (conectado) {
-      const resultado = await api.listarTabelas()
-      if (resultado.success) {
-        console.log('Tabelas encontradas:', resultado.data)
-      } else {
-        console.error('Erro ao listar tabelas:', resultado.error)
-      }
-    }
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error('Erro ao testar conexão:', error.message)
-    } else {
-      console.error('Erro ao testar conexão (desconhecido):', error)
-    }
-  }
 }
 
 function initNavigation(): void {
@@ -136,6 +116,68 @@ function renderPlanos(planos: Plano[]): void {
     </div>`
     )
     .join('')
+}
+
+async function initFormAluno(): Promise<void> {
+  const form = document.getElementById('form-aluno') as HTMLFormElement
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault()
+
+    const nome = (document.getElementById('input-nome') as HTMLInputElement).value
+    const telefone = (document.getElementById('input-telefone') as HTMLInputElement).value
+    const nascimento = (document.getElementById('input-nascimento') as HTMLInputElement).value
+
+    if (!nome || !nascimento) {
+      alert('Preencha ao menos nome e data de nascimento.')
+      return
+    }
+
+    const result = await window.api.criarAluno({
+      nome,
+      telefone,
+      data_nascimento: nascimento
+    })
+
+    if (result.success) {
+      alert('Aluno criado com sucesso!')
+      form.reset()
+      carregarAlunos()
+    } else {
+      alert(`Erro ao salvar aluno: ${result.error}`)
+    }
+  })
+}
+
+async function carregarAlunos(): Promise<void> {
+  const result = (await window.api.listarAlunos()) as ApiResult<Aluno[]>
+
+  const tbody = document.getElementById('tabela-alunos-body')
+  if (!tbody || !result.success || !result.data) return
+
+  tbody.innerHTML = result.data
+    .map(
+      (a) => `
+      <tr>
+        <td>${a.nome}</td>
+        <td>${a.telefone ?? ''}</td>
+        <td>-</td>
+        <td>-</td>
+        <td>
+          <button data-id="${a.id}" class="btn-excluir-aluno">Excluir</button>
+        </td>
+      </tr>`
+    )
+    .join('')
+
+  tbody.querySelectorAll('.btn-excluir-aluno').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      const id = Number((e.target as HTMLElement).dataset.id)
+      if (confirm('Excluir este aluno?')) {
+        await window.api.excluirAluno(id)
+        carregarAlunos()
+      }
+    })
+  })
 }
 
 function replaceText(selector: string, text: string): void {

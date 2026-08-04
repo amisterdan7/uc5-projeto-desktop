@@ -11,7 +11,7 @@ export interface Matricula {
 }
 
 export async function criarMatricula(
-  matricula: Omit<Matricula, 'id' | 'ativa' | 'data_fim_estimada'>
+  matricula: Omit<Matricula, 'id' | 'status' | 'data_fim'>
 ): Promise<Matricula> {
   const planoResult = await pool.query(`SELECT duracao_meses FROM planos WHERE id = $1`, [
     matricula.id_plano
@@ -20,9 +20,9 @@ export async function criarMatricula(
   const duracaoMeses = planoResult.rows[0]?.duracao_meses ?? 1
 
   const result = await pool.query(
-    `INSERT INTO matricula (id_aluno, id_plano, data_inicio, data_inicio_estimada, status) 
-        VALUES ($1, $2, $3, $::date + ($4 || ' months')::interval, 'ativa') RETURNING *
-        `,
+    `INSERT INTO matriculas (id_aluno, id_plano, data_inicio, data_fim_estimada, status)
+     VALUES ($1, $2, $3, $3::date + ($4 || ' months')::interval, 'ativa')
+     RETURNING *`,
     [matricula.id_aluno, matricula.id_plano, matricula.data_inicio, duracaoMeses]
   )
   return result.rows[0]

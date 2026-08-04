@@ -3,38 +3,87 @@
   <head>
     <meta charset="UTF-8" />
     <title>Academia MisterFit</title>
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
     />
-
     <link href="./assets/main.css" type="text/css" rel="stylesheet" />
   </head>
 
   <body>
     <div id="app">
-      <img alt="logo" class="logo" src="./assets/electron.svg" />
-      <div class="creator">Powered by electron-vite</div>
-      <div class="text">
-        Build an Electron app with
-        <span class="ts">TypeScript</span>
-      </div>
-      <p class="tip">Please try pressing <code>F12</code> to open the devTool</p>
-      <div class="actions">
-        <div class="action">
-          <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">Documentation</a>
-        </div>
-        <div class="action">
-          <a id="ipcHandler" target="_blank" rel="noreferrer">Send IPC</a>
-        </div>
-      </div>
+      <aside class="sidebar">
+        <div class="sidebar-title">Academia MisterFit</div>
+        <nav>
+          <button class="nav-item active" data-view="alunos">Alunos</button>
+          <button class="nav-item" data-view="planos">Planos</button>
+          <button class="nav-item" data-view="matriculas">Matrículas</button>
+        </nav>
+      </aside>
 
-      <ul class="versions">
-        <li class="electron-version"></li>
-        <li class="chrome-version"></li>
-        <li class="node-version"></li>
-      </ul>
+      <main class="content">
+        <button id="btn-novo-aluno" class="btn btn-primary">Área do Aluno</button>
+        <section class="view" id="view-alunos">
+          <header class="content-header">
+            <h1>Alunos</h1>
+          </header>
+
+          <form id="form-aluno" class="card form-grid">
+            <div class="field">
+              <label for="input-nome">Nome</label>
+              <input id="input-nome" type="text" placeholder="Nome do aluno" required />
+            </div>
+            <div class="field">
+              <label for="input-telefone">Telefone</label>
+              <input id="input-telefone" type="text" placeholder="(84) 99999-0000" />
+            </div>
+            <div class="field">
+              <label for="input-nascimento">Data de nascimento</label>
+              <input id="input-nascimento" type="date" required />
+            </div>
+            <div class="field form-actions">
+              <button type="button" id="btn-cancelar" class="btn">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+          </form>
+
+          <div class="search-bar">
+            <br />
+            <input id="input-busca" type="text" placeholder="Buscar aluno" />
+          </div>
+
+          <table class="table" id="tabela-alunos">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Plano</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabela-alunos-body">
+              <!-- linhas inseridas via renderer.ts -->
+            </tbody>
+          </table>
+        </section>
+
+        <section class="view" id="view-planos" hidden>
+          <header class="content-header">
+            <h1>Planos acessíveis para você treinar em nossas academias de alto padrão</h1>
+            <br /><br />
+          </header>
+
+          <div class="planos-grid" id="planos-grid"></div>
+        </section>
+
+        <section class="view" id="view-matriculas" hidden>
+          <header class="content-header">
+            <h1>Matrículas</h1>
+          </header>
+          <p class="empty-state">Nenhuma matrícula cadastrada ainda.</p>
+        </section>
+      </main>
     </div>
 
     <script type="module" src="./src/renderer.ts"></script>

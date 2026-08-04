@@ -1,26 +1,61 @@
-// function init(): void {
-//   window.addEventListener('DOMContentLoaded', () => {
-//     doAThing()
-//     initFormAluno()
-//     carregarAlunos()
-//   })
+interface Recurso {
+  descricao: string
+  incluido: boolean
+}
 
-//       window.api.listarPlanos().then((res) => {
-//       if (res.success && res.data) renderPlanos(res.data)
-//     })
-//   }
+interface Plano {
+  id: number
+  nome: string
+  preco: number
+  precoPromocional: number
+  duracaoMeses: number
+  descricao: string
+  destaque: boolean
+  recursos: Recurso[]
+}
+
+type Aluno = { id: number; nome: string; telefone?: string }
+type AppError = { message: string }
+type ApiOk<T> = { success: true; data: T }
+type ApiFail = { success: false; error: AppError }
+type ApiResult<T> = ApiOk<T> | ApiFail
 
 function init(): void {
   window.addEventListener('DOMContentLoaded', () => {
-
+    initNavigation()
     doAThing()
-
     initFormAluno()
     carregarAlunos()
-
-    window.api.listarPlanos().then((res) => {
-      if (res.success && res.data) renderPlanos(res.data)
-    })
+    renderPlanos([
+      {
+        id: 1,
+        nome: 'Plano Mister',
+        preco: 159.9,
+        precoPromocional: 0,
+        duracaoMeses: 12,
+        descricao: 'Acesso completo a todas as unidades e benefícios premium.',
+        destaque: true,
+        recursos: [
+          { descricao: 'Acesso ilimitado a todas as unidades', incluido: true },
+          { descricao: 'Avaliação física mensal', incluido: true },
+          { descricao: 'App MisterFit', incluido: true }
+        ]
+      },
+      {
+        id: 2,
+        nome: 'Plano Fit',
+        preco: 99.9,
+        precoPromocional: 0,
+        duracaoMeses: 6,
+        descricao: 'O plano mais econômico para treinar quando quiser.',
+        destaque: false,
+        recursos: [
+          { descricao: 'Acesso ilimitado a todas as unidades', incluido: false },
+          { descricao: 'Avaliação física mensal', incluido: false },
+          { descricao: 'App MisterFit', incluido: true }
+        ]
+      }
+    ])
   })
 }
 
@@ -36,22 +71,72 @@ function doAThing(): void {
   })
 }
 
+function initNavigation(): void {
+  const navItems = document.querySelectorAll<HTMLButtonElement>('.nav-item')
+  const views = document.querySelectorAll<HTMLElement>('.view')
+
+  navItems.forEach((item) => {
+    item.addEventListener('click', () => {
+      const target = item.dataset.view
+
+      navItems.forEach((nav) => nav.classList.remove('active'))
+      item.classList.add('active')
+
+      views.forEach((view) => {
+        view.hidden = view.id !== `view-${target}`
+      })
+    })
+  })
+}
+
+function badgeClass(destaque: boolean): string {
+  return destaque ? 'premium' : 'basico'
+}
+
+function renderPlanos(planos: Plano[]): void {
+  const grid = document.getElementById('planos-grid')
+  if (!grid) return
+
+  grid.innerHTML = planos
+    .map(
+      (p) =>
+        `<div class="plano-card">
+      <span class="plano-badge ${badgeClass(p.destaque)}">${p.nome}</span>
+      <p>${p.descricao}</p>
+      <p class="plano-preco"> <span>A partir de</span><br> R$ ${p.precoPromocional.toFixed(2)} <span> no 1º mês depois R$ ${p.preco.toFixed(2)}</span></p>
+      <p class="plano-duracao">${p.duracaoMeses} ${p.duracaoMeses === 1 ? 'mês' : 'meses'}</p>
+      <div class="plano-acoes">
+        <button data-id="${p.id}" class="btn-contratar-plano">Contratar Plano</button>
+      </div>
+
+      <ul>
+        ${p.recursos.map((recurso) => `<li>✅${recurso.descricao}</li>`).join('')}
+      </ul>
+
+    </div>`
+    )
+    .join('')
+}
+
 async function initFormAluno(): Promise<void> {
-  const form = document.getElementById('formAluno') as HTMLFormElement
+  const form = document.getElementById('form-aluno') as HTMLFormElement
   form.addEventListener('submit', async (event) => {
     event.preventDefault()
-    
-    const nome = (document.getElementById('nome') as HTMLInputElement).value
-    const email = (document.getElementById('email') as HTMLInputElement).value
-    const telefone = (document.getElementById('telefone') as HTMLInputElement).value
-    const nascimento = (document.getElementById('nascimento') as HTMLInputElement).value
 
-    if (!nome || !email || !nascimento || !telefone) {
-      alert('Por favor, preencha todos os campos.')
+    const nome = (document.getElementById('input-nome') as HTMLInputElement).value
+    const telefone = (document.getElementById('input-telefone') as HTMLInputElement).value
+    const nascimento = (document.getElementById('input-nascimento') as HTMLInputElement).value
+
+    if (!nome || !nascimento) {
+      alert('Preencha ao menos nome e data de nascimento.')
       return
     }
 
-    const result = await window.api.criarAluno({ nome, telefone, data_nascimento: nascimento, email })
+    const result = await window.api.criarAluno({
+      nome,
+      telefone,
+      data_nascimento: nascimento
+    })
 
     if (result.success) {
       alert('Aluno criado com sucesso!')
@@ -60,25 +145,29 @@ async function initFormAluno(): Promise<void> {
     } else {
       alert(`Erro ao salvar aluno: ${result.error}`)
     }
-
   })
 }
 
 async function carregarAlunos(): Promise<void> {
-  const result = await window.api.listarAlunos()
-  const tbody = document.getElementById('tabela-alunos-body')
-  if (!tbody || !result.sucess || !result.data) return
+  const result = (await window.api.listarAlunos()) as ApiResult<Aluno[]>
 
-  tbody.innerHTML = result.data.map((a: any) => 
-    `<tr>
-      <td>${a.nome}</td>
-      <td>${a.telefone ?? ''}</td>
-      <td>-</td>
-      <td>-</td>
-      <td>
-        <button data-id="${a.id}" class="btn-excluir-aluno">Excluir</button>
-      </td>
-    </tr> `).json('')
+  const tbody = document.getElementById('tabela-alunos-body')
+  if (!tbody || !result.success || !result.data) return
+
+  tbody.innerHTML = result.data
+    .map(
+      (a) => `
+      <tr>
+        <td>${a.nome}</td>
+        <td>${a.telefone ?? ''}</td>
+        <td>-</td>
+        <td>-</td>
+        <td>
+          <button data-id="${a.id}" class="btn-excluir-aluno">Excluir</button>
+        </td>
+      </tr>`
+    )
+    .join('')
 
   tbody.querySelectorAll('.btn-excluir-aluno').forEach((btn) => {
     btn.addEventListener('click', async (e) => {

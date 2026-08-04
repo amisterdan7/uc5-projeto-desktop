@@ -4,26 +4,57 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { testConnection } from './db/connection'
 import { criarAluno, listarAlunos, atualizarAluno, excluirAluno } from './db/alunos_repository'
-import { criarPlano, listarPlanos, atualizarPlano, excluirPlano } from './db/planos_repository'
+import {
+  criarPlano,
+  listarPlanos,
+  atualizarPlano,
+  excluirPlano,
+  Plano
+} from './db/planos_repository'
 import {
   listarMatriculas,
   criarMatricula,
   atualizarStatusMatricula,
-  excluirMatricula
+  excluirMatricula,
+  Matricula
 } from './db/matriculas_repository'
-// import { error } from 'console'
+
+// Definições de tipos para os resultados da API
+type AppError = { message: string }
+type ApiOk<T> = { success: true; data: T }
+type ApiFail = { success: false; error: AppError }
+type ApiResult<T> = ApiOk<T> | ApiFail
+type MatriculaComNomes = Matricula & { aluno_nome: string; plano_nome: string }
+
+// Definindo tipos de erros
+// type DbConnectionError = {
+//   type: 'DB_CONNECTION'
+//   message: string
+// }
+// type RepoError = {
+//   type: 'REPOSITORY_ERROR'
+//   message: string
+// }
+// type UpdateStatusError = {
+//   type: 'UPDATE_STATUS_ERROR'
+//   message: string
+// }
+// type NotFoundError = {
+//   type: 'NOT_FOUND'
+//   message: string
+// }
+// type AppError = DbConnectionError | UpdateStatusError | NotFoundError| RepoError
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    title: 'Controle de Academia',
+    title: 'Acadamia MisterFit',
     width: 1024,
     height: 700,
     minWidth: 800,
     minHeight: 600,
     center: true,
     show: false,
-    // autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -33,6 +64,9 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+    if (is.dev) {
+      mainWindow.webContents.openDevTools()
+    }
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -101,73 +135,85 @@ app.whenReady().then(() => {
 
   ipcMain.handle('alunos:listar', async () => {
     try {
-      return { sucess: true, data: await listarAlunos() }
+      return { success: true, data: await listarAlunos() }
     } catch (err) {
-      return { sucess: false, error: (err as Error).message }
+      return { success: false, error: (err as Error).message }
     }
   })
 
   ipcMain.handle('alunos:atualizar', async (_e, id, aluno) => {
     try {
-      return { sucess: true, data: await atualizarAluno(id, aluno) }
+      return { success: true, data: await atualizarAluno(id, aluno) }
     } catch (error) {
-      return { sucess: false, error: (error as Error).message }
+      return { success: false, error: (error as Error).message }
     }
   })
 
-  ipcMain.handle('aluno:excluir', async (_e, id) => {
+  ipcMain.handle('alunos:excluir', async (_e, id) => {
     try {
-      return { sucess: true, data: await excluirAluno(id) }
+      return { success: true, data: await excluirAluno(id) }
     } catch (error) {
-      return { sucess: false, error: (error as Error).message }
+      return { success: false, error: (error as Error).message }
     }
   })
 
   ipcMain.handle('planos:criar', async (_e, plano) => {
     try {
-      return { sucess: true, data: await criarPlano(plano) }
-    } catch (error) {
-      return { sucess: false, error: (error as Error).message }
+      return { success: true, data: await criarPlano(plano) } satisfies ApiResult<Plano>
+    } catch (err) {
+      return {
+        success: false,
+        error: { message: (err as Error).message }
+      } satisfies ApiResult<Plano>
     }
   })
 
   ipcMain.handle('planos:listar', async () => {
     try {
-      return { sucess: true, data: await listarPlanos() }
-    } catch (error) {
-      return { sucess: false, error: (error as Error).message }
+      return { success: true, data: await listarPlanos() } satisfies ApiResult<Plano[]>
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro desconhecido'
+      return { success: false, error: { message } } satisfies ApiResult<Plano[]>
     }
   })
 
   ipcMain.handle('planos:atualizar', async (_e, id, plano) => {
     try {
-      return { sucess: true, data: await atualizarPlano(id, plano) }
+      return { success: true, data: await atualizarPlano(id, plano) } satisfies ApiResult<Plano>
     } catch (error) {
-      return { sucess: false, error: (error as Error).message }
+      return {
+        success: false,
+        error: { message: (error as Error).message }
+      } satisfies ApiResult<Plano>
     }
   })
 
   ipcMain.handle('planos:excluir', async (_e, id) => {
     try {
-      return { sucess: true, data: await excluirPlano(id) }
+      return { success: true, data: await excluirPlano(id) } satisfies ApiResult<void>
     } catch (err) {
-      return { sucess: false, error: (err as Error).message }
+      const message = err instanceof Error ? err.message : 'Erro desconhecido'
+      return { success: false, error: { message } } satisfies ApiResult<void>
     }
   })
 
   ipcMain.handle('matriculas:criar', async (_e, matricula) => {
     try {
-      return { sucess: true, data: await criarMatricula(matricula) }
+      return { success: true, data: await criarMatricula(matricula) } satisfies ApiResult<Matricula>
     } catch (err) {
-      return { sucess: false, error: (err as Error).message }
+      const message = err instanceof Error ? err.message : 'Erro desconhecido'
+      return { success: false, error: { message } } satisfies ApiResult<Matricula>
     }
   })
 
   ipcMain.handle('matriculas:listar', async () => {
     try {
-      return { success: true, data: await listarMatriculas() }
-    } catch (error) {
-      return { success: false, error: (error as Error).message }
+      return { success: true, data: await listarMatriculas() } satisfies ApiResult<
+        MatriculaComNomes[]
+      >
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro desconhecido'
+      return { success: false, error: { message } } satisfies ApiResult<MatriculaComNomes[]>
     }
   })
 
@@ -175,8 +221,9 @@ app.whenReady().then(() => {
     try {
       await atualizarStatusMatricula(id, status)
       return { success: true }
-    } catch (error) {
-      return { success: false, error: (error as Error).message }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro desconhecido'
+      return { success: false, error: { message } } satisfies ApiResult<void>
     }
   })
 
@@ -184,8 +231,9 @@ app.whenReady().then(() => {
     try {
       await excluirMatricula(id)
       return { success: true }
-    } catch (error) {
-      return { success: false, error: (error as Error).message }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro desconhecido'
+      return { success: false, error: { message } } satisfies ApiResult<void>
     }
   })
 

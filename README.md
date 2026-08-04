@@ -17,6 +17,7 @@ Desktop).
 - HTML/CSS
 - PostgreSQL (via driver `pg`)
 
+
 ## Como rodar
 
 ```bash
@@ -26,25 +27,22 @@ npm install
 npm run dev
 ```
 
-## Instalador
+## 🗄️ Modelagem do Banco de Dados (PostgreSQL)
 
-O instalador (.exe) está disponível na aba [Releases](../../releases).
+A aplicação utiliza um banco de dados relacional PostgreSQL estruturado em três tabelas principais para gerenciar os alunos, planos e suas respectivas matrículas.
 
-# Academia MisterFit
 
-Aplicação desktop de controle de academia, feita com Electron, TypeScript e
-PostgreSQL. Projeto Integrador individual da UC5 (Desenvolver Aplicações
-Desktop).
+# 📐 Diagrama de Relacionamento (ER)
 
-## Funcionalidades
+```text
+  +------------------+         +----------------------+         +-------------------+
+  |      ALUNOS      |         |      MATRÍCULAS      |         |      PLANOS       |
+  +------------------+         +----------------------+         +-------------------+
+  | id (PK)          |<-------1| id (PK)              |         | id (PK)           |
+  | nome             |         | id_aluno (FK)        |         | nome              |
+  | data_nascimento  |         | id_plano (FK)        |-------->| preco             |
+  | telefone         |         | data_inicio          |         | duracao_meses     |
+  +------------------+         | data_fim_estimada    |         +-------------------+
+                               | status               |
+                               +----------------------+
 
-- Cadastro de alunos
-- Cadastro de planos
-- Matrícula de alunos em planos, com cálculo automático da data de término
-- Listagem de alunos com plano vencido
-
-## Tecnologias
-
-- Electron + Vite + TypeScript
-- HTML/CSS
-- PostgreSQL (via driver `pg`)

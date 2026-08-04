@@ -109,7 +109,9 @@ body {
   font-size: 14px;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   width: 100%;
   max-width: 100%;
   min-width: 0;

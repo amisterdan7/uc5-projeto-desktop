@@ -19,12 +19,12 @@ Desktop).
 
 ## Como rodar
 
-\`\`\`bash
+```bash
 git clone https://github.com/amisterdan7/uc5-projeto-desktop.git
 cd uc5-projeto-desktop
 npm install
 npm run dev
-\`\`\`
+```
 
 ## Instalador
 
@@ -48,16 +48,3 @@ Desktop).
 - Electron + Vite + TypeScript
 - HTML/CSS
 - PostgreSQL (via driver `pg`)
-
-## Como rodar
-
-\`\`\`bash
-git clone https://github.com/amisterdan7/uc5-projeto-desktop.git
-cd uc5-projeto-desktop
-npm install
-npm run dev
-\`\`\`
-
-## Instalador
-
-O instalador (.exe) está disponível na aba [Releases](../../releases).

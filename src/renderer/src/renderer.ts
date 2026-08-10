@@ -127,8 +127,26 @@ async function initFormAluno(): Promise<void> {
     const telefone = (document.getElementById('input-telefone') as HTMLInputElement).value
     const nascimento = (document.getElementById('input-nascimento') as HTMLInputElement).value
 
-    if (!nome || !nascimento) {
-      alert('Preencha ao menos nome e data de nascimento.')
+
+
+    // Validação com campos obrigatórios e formato de telefone
+    if (!nome || !telefone || !nascimento) {
+      alert('Preencha todos os campos obrigatórios.')
+      return
+    }
+    const telefoneRegex = /^\(\d{2}\) \d{4,5}-\d{4}$/
+    if (telefone && !telefoneRegex.test(telefone)) {
+      alert('O telefone do aluno deve estar no formato (99) 99999-9999.')
+      return
+    }
+
+    if (nome.length > 10) {
+      alert('O nome do aluno não pode ter mais de 10 caracteres.')
+      return
+    }
+
+    if (!nome || !nascimento || !telefone) {
+      alert('Preencha todos os campos obrigatórios.')
       return
     }
 

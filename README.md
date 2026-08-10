@@ -17,7 +17,6 @@ Desktop).
 - HTML/CSS
 - PostgreSQL (via driver `pg`)
 
-
 ## Como rodar
 
 ```bash
@@ -30,7 +29,6 @@ npm run dev
 ## 🗄️ Modelagem do Banco de Dados (PostgreSQL)
 
 A aplicação utiliza um banco de dados relacional PostgreSQL estruturado em três tabelas principais para gerenciar os alunos, planos e suas respectivas matrículas.
-
 
 # 📐 Diagrama de Relacionamento (ER)
 
@@ -46,3 +44,4 @@ A aplicação utiliza um banco de dados relacional PostgreSQL estruturado em tr�
                                | status               |
                                +----------------------+
 
+```

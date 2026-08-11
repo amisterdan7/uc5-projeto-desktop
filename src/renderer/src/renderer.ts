@@ -127,9 +127,6 @@ async function initFormAluno(): Promise<void> {
     const telefone = (document.getElementById('input-telefone') as HTMLInputElement).value
     const nascimento = (document.getElementById('input-nascimento') as HTMLInputElement).value
 
-
-
-    // Validação com campos obrigatórios e formato de telefone
     if (!nome || !telefone || !nascimento) {
       alert('Preencha todos os campos obrigatórios.')
       return

@@ -92,7 +92,6 @@ async function carregarAlunos(): Promise<void> {
   try {
     const result = (await window.api.listarAlunos()) as ApiResult<Aluno[]>
 
-
     if (!result.success) {
       exibirMensagemTabela(
         tbody,
@@ -212,7 +211,7 @@ async function carregarPlanos(): Promise<void> {
     console.error('Erro de conexão ao buscar planos:', err)
   }
 }
- // Renderização de planos
+// Renderização de planos
 function renderPlanos(planos: Plano[]): void {
   const grid = document.getElementById('planos-grid')
   if (!grid) return

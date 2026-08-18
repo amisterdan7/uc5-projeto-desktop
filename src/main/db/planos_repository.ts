@@ -12,12 +12,7 @@ export async function criarPlano(plano: Omit<Plano, 'id'>): Promise<Plano> {
     `INSERT INTO planos (nome, preco, duracao_meses) VALUES ($1, $2, $3) RETURNING *`,
     [plano.nome, plano.preco, plano.duracao_meses]
   )
-  return result.rows[0]
-}
-
-export async function listarPlanos(): Promise<Plano[]> {
-  const result = await pool.query(`SELECT * FROM planos ORDER BY preco`)
-  return result.rows
+  return { ...result.rows[0], preco: Number(result.rows[0].preco) }
 }
 
 export async function atualizarPlano(id: number, plano: Omit<Plano, 'id'>): Promise<Plano> {
@@ -25,7 +20,15 @@ export async function atualizarPlano(id: number, plano: Omit<Plano, 'id'>): Prom
     `UPDATE planos SET nome = $1, preco = $2, duracao_meses = $3 WHERE id = $4 RETURNING *`,
     [plano.nome, plano.preco, plano.duracao_meses, id]
   )
-  return result.rows[0]
+  return { ...result.rows[0], preco: Number(result.rows[0].preco) }
+}
+
+export async function listarPlanos(): Promise<Plano[]> {
+  const result = await pool.query(`SELECT * FROM planos ORDER BY preco`)
+  return result.rows.map((row) => ({
+    ...row,
+    preco: Number(row.preco)
+  }))
 }
 
 export async function excluirPlano(id: number): Promise<void> {

@@ -22,11 +22,13 @@
       </aside>
 
       <main class="content">
-        <button id="btn-novo-aluno" class="btn btn-primary">Área do Aluno</button>
         <section class="view" id="view-alunos">
           <header class="content-header">
             <h1>Alunos</h1>
+            <button id="btn-novo-aluno" class="btn btn-primary">Área do Aluno</button>
           </header>
+
+          <p id="aviso-plano-selecionado" class="empty-state" hidden></p>
 
           <form id="form-aluno" class="card form-grid">
             <div class="field">
@@ -34,7 +36,7 @@
               <input id="input-nome" type="text" placeholder="Nome do aluno" required />
             </div>
             <div class="field">
-              <label for="input-telefone">Telefone</label>
+              <label for="input-telefone" length="14">Telefone</label>
               <input id="input-telefone" type="text" placeholder="(84) 99999-0000" />
             </div>
             <div class="field">
@@ -80,8 +82,50 @@
         <section class="view" id="view-matriculas" hidden>
           <header class="content-header">
             <h1>Matrículas</h1>
+            <button id="btn-nova-matricula" class="btn btn-primary">+ Nova matrícula</button>
           </header>
-          <p class="empty-state">Nenhuma matrícula cadastrada ainda.</p>
+
+          <form id="form-matricula" class="card form-grid" hidden>
+            <div class="field">
+              <label for="select-aluno">Aluno</label>
+              <select id="select-aluno" required></select>
+            </div>
+            <div class="field">
+              <label for="select-plano">Plano</label>
+              <select id="select-plano" required></select>
+            </div>
+            <div class="field">
+              <label for="input-data-inicio">Data de início</label>
+              <input id="input-data-inicio" type="date" required />
+            </div>
+            <div class="field">
+              <label for="input-data-fim">Vencimento</label>
+              <input
+                id="input-data-fim"
+                type="text"
+                disabled
+                placeholder="Selecione plano e início"
+              />
+            </div>
+            <div class="field form-actions">
+              <button type="button" id="btn-cancelar-matricula" class="btn">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Matricular</button>
+            </div>
+          </form>
+
+          <table class="table" id="tabela-matriculas">
+            <thead>
+              <tr>
+                <th>Aluno</th>
+                <th>Plano</th>
+                <th>Início</th>
+                <th>Vencimento</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabela-matriculas-body"></tbody>
+          </table>
         </section>
       </main>
     </div>

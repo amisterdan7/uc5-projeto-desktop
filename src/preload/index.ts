@@ -1,40 +1,24 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
 
-// Custom APIs for renderer
-const api = {
+contextBridge.exposeInMainWorld('api', {
   testConnection: () => ipcRenderer.invoke('db:test-connection'),
 
   // Alunos
-  criarAluno: (aluno: unknown) => ipcRenderer.invoke('alunos:criar', aluno),
-  atualizarAluno: (id: number, aluno: unknown) => ipcRenderer.invoke('alunos:atualizar', id, aluno),
-  excluirAluno: (id: number) => ipcRenderer.invoke('alunos:excluir', id),
+  criarAluno: (aluno) => ipcRenderer.invoke('alunos:criar', aluno),
   listarAlunos: () => ipcRenderer.invoke('alunos:listar'),
+  atualizarAluno: (id, aluno) => ipcRenderer.invoke('alunos:atualizar', id, aluno),
+  excluirAluno: (id) => ipcRenderer.invoke('alunos:excluir', id),
 
   // Planos
-  criarPlano: (plano: unknown) => ipcRenderer.invoke('planos:criar', plano),
-  atualizarPlano: (id: number, plano: unknown) => ipcRenderer.invoke('planos:atualizar', id, plano),
-  excluirPlano: (id: number) => ipcRenderer.invoke('planos:excluir', id),
+  criarPlano: (plano) => ipcRenderer.invoke('planos:criar', plano),
   listarPlanos: () => ipcRenderer.invoke('planos:listar'),
+  atualizarPlano: (id, plano) => ipcRenderer.invoke('planos:atualizar', id, plano),
+  excluirPlano: (id) => ipcRenderer.invoke('planos:excluir', id),
 
-  // Matriculas
-  criarMatricula: (matricula: unknown) => ipcRenderer.invoke('matriculas:criar', matricula),
-  atualizarStatusMatricula: (id: number, status: 'ativa' | 'inativa') =>
+  // Matrículas
+  criarMatricula: (matricula) => ipcRenderer.invoke('matriculas:criar', matricula),
+  listarMatriculas: () => ipcRenderer.invoke('matriculas:listar'),
+  atualizarStatusMatricula: (id, status) =>
     ipcRenderer.invoke('matriculas:atualizar-status', id, status),
-  excluirMatricula: (id: number) => ipcRenderer.invoke('matriculas:excluir', id),
-  listarMatriculas: () => ipcRenderer.invoke('matriculas:listar')
-}
-
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
-  } catch (error) {
-    console.error(error)
-  }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
-}
+  excluirMatricula: (id) => ipcRenderer.invoke('matriculas:excluir', id)
+})

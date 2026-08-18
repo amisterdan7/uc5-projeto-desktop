@@ -1,64 +1,85 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 
-interface ListarTabelasResult {
-  success: boolean
-  data?: string[]
-  error?: string
+export interface ApiError {
+  message: string
 }
-interface Api {
+
+export interface Aluno {
+  id: number
+  nome: string
+  data_nascimento: string
+  telefone?: string
+}
+
+export interface Plano {
+  id: number
+  nome: string
+  preco: number
+  duracao_meses: number
+}
+
+export interface Matricula {
+  id: number
+  id_aluno: number
+  id_plano: number
+  data_inicio: string
+  data_fim_estimada: string
+  status: 'ativa' | 'inativa'
+}
+
+export interface MatriculaComNomes extends Matricula {
+  aluno_nome: string
+  plano_nome: string
+}
+
+export interface Api {
   testConnection: () => Promise<boolean>
-  criarAluno: (aluno: {
-    nome: string
-    telefone?: string
-    data_nascimento: string
-    email?: string
-  }) => Promise<{ success: boolean; data?: string; error?: { message: string } }>
 
-  listarAlunos: () => Promise<{ success: boolean; data?: string; error?: { message: string } }>
-
+  // Alunos
+  criarAluno: (
+    aluno: Omit<Aluno, 'id'>
+  ) => Promise<{ success: boolean; data?: Aluno; error?: ApiError }>
+  listarAlunos: () => Promise<{ success: boolean; data?: Aluno[]; error?: ApiError }>
   atualizarAluno: (
     id: number,
-    aluno: { nome: string; telefone?: string; data_nascimento: string; email?: string }
-  ) => Promise<{ success: boolean; data?: string; error?: { message: string } }>
-  excluirAluno: (
-    id: number
-  ) => Promise<{ success: boolean; data?: string; error?: { message: string } }>
-  criarPlano: (plano: {
-    nome: string
-    descricao?: string
-    valor_mensalidade: number
-  }) => Promise<{ success: boolean; data?: string; error?: { message: string } }>
-  listarPlanos: () => Promise<{ success: boolean; data?: string[]; error?: { message: string } }>
+    aluno: Omit<Aluno, 'id'>
+  ) => Promise<{ success: boolean; data?: Aluno; error?: ApiError }>
+  excluirAluno: (id: number) => Promise<{ success: boolean; error?: ApiError }>
+
+  // Planos
+  criarPlano: (
+    plano: Omit<Plano, 'id'>
+  ) => Promise<{ success: boolean; data?: Plano; error?: ApiError }>
+  listarPlanos: () => Promise<{ success: boolean; data?: Plano[]; error?: ApiError }>
   atualizarPlano: (
     id: number,
-    plano: { nome: string; descricao?: string; valor_mensalidade: number }
-  ) => Promise<{ success: boolean; data?: string; error?: { message: string } }>
-  excluirPlano: (
-    id: number
-  ) => Promise<{ success: boolean; data?: string; error?: { message: string } }>
+    plano: Omit<Plano, 'id'>
+  ) => Promise<{ success: boolean; data?: Plano; error?: ApiError }>
+  excluirPlano: (id: number) => Promise<{ success: boolean; error?: ApiError }>
+
+  // Matrículas
   criarMatricula: (matricula: {
-    aluno_id: number
-    plano_id: number
+    id_aluno: number
+    id_plano: number
     data_inicio: string
-    data_fim?: string
-    status: 'ativa' | 'inativa'
-  }) => Promise<{ success: boolean; data?: string; error?: { message: string } }>
+  }) => Promise<{ success: boolean; data?: Matricula; error?: ApiError }>
   listarMatriculas: () => Promise<{
     success: boolean
-    data?: string[]
-    error?: { message: string }
+    data?: MatriculaComNomes[]
+    error?: ApiError
   }>
   atualizarStatusMatricula: (
     id: number,
     status: 'ativa' | 'inativa'
-  ) => Promise<{ success: boolean; data?: string; error?: { message: string } }>
-  excluirMatricula: (
-    id: number
-  ) => Promise<{ success: boolean; data?: string; error?: { message: string } }>
+  ) => Promise<{ success: boolean; error?: ApiError }>
+  excluirMatricula: (id: number) => Promise<{ success: boolean; error?: ApiError }>
 }
+
 declare global {
   interface Window {
     electron: ElectronAPI
     api: Api
   }
 }
+
+export {}

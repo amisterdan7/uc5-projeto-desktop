@@ -6,7 +6,6 @@ export interface Matricula {
   id_plano: number
   data_inicio: string
   data_fim: string
-  // valor_pago: number;
   status: 'ativa' | 'inativa'
 }
 

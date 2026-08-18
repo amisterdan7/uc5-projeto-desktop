@@ -1,5 +1,3 @@
-// src/main/db/alunos.repository.ts
-
 import { pool } from './connection'
 
 export interface Aluno {

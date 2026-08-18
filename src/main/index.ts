@@ -18,6 +18,7 @@ import {
   excluirMatricula,
   Matricula
 } from './db/matriculas_repository'
+// import { triggerAsyncId } from 'async_hooks'
 
 // Definições de tipos para os resultados da API
 type AppError = { message: string }
@@ -26,27 +27,7 @@ type ApiFail = { success: false; error: AppError }
 type ApiResult<T> = ApiOk<T> | ApiFail
 type MatriculaComNomes = Matricula & { aluno_nome: string; plano_nome: string }
 
-// Definindo tipos de erros
-// type DbConnectionError = {
-//   type: 'DB_CONNECTION'
-//   message: string
-// }
-// type RepoError = {
-//   type: 'REPOSITORY_ERROR'
-//   message: string
-// }
-// type UpdateStatusError = {
-//   type: 'UPDATE_STATUS_ERROR'
-//   message: string
-// }
-// type NotFoundError = {
-//   type: 'NOT_FOUND'
-//   message: string
-// }
-// type AppError = DbConnectionError | UpdateStatusError | NotFoundError| RepoError
-
 function createWindow(): void {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     title: 'Academia MisterFit',
     width: 1024,
@@ -57,10 +38,16 @@ function createWindow(): void {
     show: false,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: false,
+      preload: join(__dirname, '../preload/index.js')
     }
   })
+
+  if (is.dev) {
+    mainWindow.webContents.openDevTools()
+  }
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()

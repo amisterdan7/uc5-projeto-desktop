@@ -22,6 +22,9 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
+      - name: Verificar formatação (Prettier)
+        run: npm run format:check
+
       - name: Verificar tipos (TypeScript)
         run: npm run typecheck
 

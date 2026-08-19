@@ -23,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: Verificar formatação (Prettier)
-        run: npm run format:check
+        run: npm run format
 
       - name: Verificar tipos (TypeScript)
         run: npm run typecheck

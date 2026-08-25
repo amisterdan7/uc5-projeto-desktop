@@ -25,10 +25,7 @@ export async function atualizarPlano(id: number, plano: Omit<Plano, 'id'>): Prom
 
 export async function listarPlanos(): Promise<Plano[]> {
   const result = await pool.query(`SELECT * FROM planos ORDER BY preco`)
-  return result.rows.map((row) => ({
-    ...row,
-    preco: Number(row.preco)
-  }))
+  return result.rows.map((row) => ({ ...row, preco: Number(row.preco) }))
 }
 
 export async function excluirPlano(id: number): Promise<void> {

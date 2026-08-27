@@ -9,6 +9,11 @@ export interface Matricula {
   status: 'ativa' | 'inativa'
 }
 
+export interface MatriculaComNomes extends Matricula {
+  aluno_nome: string
+  plano_nome: string
+}
+
 export async function criarMatricula(
   matricula: Omit<Matricula, 'id' | 'status' | 'data_fim'>
 ): Promise<Matricula> {
@@ -27,14 +32,25 @@ export async function criarMatricula(
   return result.rows[0]
 }
 
-export async function listarMatriculas(): Promise<
-  (Matricula & { aluno_nome: string; plano_nome: string })[]
-> {
+export async function listarMatriculas(): Promise<MatriculaComNomes[]> {
   const result = await pool.query(`
-    SELECT m.*, a.nome AS aluno_nome, p.nome AS plano_nome
+    SELECT 
+      m.id,
+      m.id_aluno,
+      m.id_plano,
+      m.data_inicio,
+      m.data_fim_estimada,
+      -- O BANCO CALCULA O STATUS AQUI:
+      CASE
+        WHEN m.status = 'inativa' THEN 'inativa'
+        WHEN m.data_fim_estimada < CURRENT_DATE THEN 'vencida'
+        ELSE 'ativa'
+      END as status,
+      a.nome as aluno_nome,
+      p.nome as plano_nome
     FROM matriculas m
-    JOIN alunos a ON a.id = m.id_aluno
-    JOIN planos p ON p.id = m.id_plano
+    LEFT JOIN alunos a ON m.id_aluno = a.id
+    LEFT JOIN planos p ON m.id_plano = p.id
     ORDER BY m.data_inicio DESC
   `)
   return result.rows

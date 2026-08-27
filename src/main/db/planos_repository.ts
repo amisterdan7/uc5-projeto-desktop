@@ -1,5 +1,18 @@
 import { pool } from './connection'
 
+export interface Recurso {
+  descricao: string
+}
+
+export interface Plano {
+  id: number
+  nome: string
+  preco: number
+  duracao_meses: number
+  descricao: string
+  destaque: boolean
+  recursos: Recurso[]
+}
 export interface Plano {
   id: number
   nome: string
@@ -24,8 +37,26 @@ export async function atualizarPlano(id: number, plano: Omit<Plano, 'id'>): Prom
 }
 
 export async function listarPlanos(): Promise<Plano[]> {
-  const result = await pool.query(`SELECT * FROM planos ORDER BY preco`)
-  return result.rows.map((row) => ({ ...row, preco: Number(row.preco) }))
+  const result = await pool.query(`
+    SELECT
+      p.id, p.nome, p.preco, p.duracao_meses, p.descricao, p.destaque,
+      COALESCE(
+        json_agg(
+          json_build_object('descricao', r.descricao)
+          ORDER BY r.ordem
+        ) FILTER (WHERE r.id IS NOT NULL),
+        '[]'
+      ) AS recursos
+    FROM planos p
+    LEFT JOIN plano_recursos r ON r.id_plano = p.id
+    GROUP BY p.id
+    ORDER BY p.preco DESC
+  `)
+
+  return result.rows.map((row) => ({
+    ...row,
+    preco: Number(row.preco)
+  }))
 }
 
 export async function excluirPlano(id: number): Promise<void> {

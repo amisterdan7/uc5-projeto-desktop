@@ -4,6 +4,20 @@ export interface ApiError {
   message: string
 }
 
+interface Recurso {
+  descricao: string
+}
+
+interface Plano {
+  id: number
+  nome: string
+  preco: number
+  duracao_meses: number
+  descricao: string
+  destaque: boolean
+  recursos: Recurso[]
+}
+
 export interface Aluno {
   id: number
   nome: string
@@ -32,14 +46,21 @@ export interface MatriculaComNomes extends Matricula {
   plano_nome: string
 }
 
+interface AlunoListado extends Aluno {
+  plano_nome: string | null
+  status_matricula: 'ativa' | 'inativa' | 'vencida' | 'sem_matricula'
+}
+
 export interface Api {
+  showWarning(mensagem: string): unknown
+  showError(mensagem: string): unknown
   testConnection: () => Promise<boolean>
 
   // Alunos
   criarAluno: (
     aluno: Omit<Aluno, 'id'>
   ) => Promise<{ success: boolean; data?: Aluno; error?: ApiError }>
-  listarAlunos: () => Promise<{ success: boolean; data?: Aluno[]; error?: ApiError }>
+  listarAlunos: () => Promise<{ success: boolean; data?: AlunoListado[]; error?: ApiError }>
   atualizarAluno: (
     id: number,
     aluno: Omit<Aluno, 'id'>

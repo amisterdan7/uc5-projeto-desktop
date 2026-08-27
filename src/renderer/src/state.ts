@@ -1,10 +1,10 @@
-import type { Aluno, Plano, MatriculaComNomes } from './types'
+import type { Plano, MatriculaComNomes, AlunoListado } from './types'
 
-export let cacheAlunos: Aluno[] = []
+export let cacheAlunos: AlunoListado[] = []
 export let cachePlanos: Plano[] = []
 export let cacheMatriculas: MatriculaComNomes[] = []
 
-export function setCacheAlunos(dados: Aluno[]): void {
+export function setCacheAlunos(dados: AlunoListado[]): void {
   cacheAlunos = dados
 }
 

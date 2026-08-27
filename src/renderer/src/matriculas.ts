@@ -1,5 +1,5 @@
-import type { MatriculaComNomes, ApiResult } from './types'
-import { cacheAlunos, cachePlanos, setCacheMatriculas } from './state'
+import type { MatriculaComNomes, ApiResult, Plano, AlunoListado } from './types'
+import { setCacheMatriculas, setCacheAlunos, setCachePlanos } from './state'
 import { formatarDataBR, exibirMensagemTabela } from './utils'
 import { irParaView } from './state'
 
@@ -7,25 +7,59 @@ export async function popularMatricula(): Promise<void> {
   const selectAluno = document.getElementById('select-aluno') as HTMLSelectElement | null
   const selectPlano = document.getElementById('select-plano') as HTMLSelectElement | null
 
+  // 1. Popula Alunos buscando direto do Main (Banco de Dados)
   if (selectAluno) {
     selectAluno.replaceChildren()
-    cacheAlunos.forEach((a) => {
-      const opt = document.createElement('option')
-      opt.value = a.id.toString()
-      opt.textContent = a.nome
-      selectAluno.appendChild(opt)
-    })
+
+    const optionVazia = document.createElement('option')
+    optionVazia.value = ''
+    optionVazia.textContent = 'Selecione um aluno...'
+    optionVazia.disabled = true
+    optionVazia.selected = true
+    selectAluno.appendChild(optionVazia)
+
+    try {
+      const result = (await window.api.listarAlunos()) as ApiResult<AlunoListado[]>
+      if (result.success && result.data) {
+        setCacheAlunos(result.data) // Atualiza o estado global
+        result.data.forEach((a) => {
+          const opt = document.createElement('option')
+          opt.value = a.id.toString()
+          opt.textContent = a.nome
+          selectAluno.appendChild(opt)
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao buscar alunos:', error)
+    }
   }
 
+  // 2. Popula Planos buscando direto do Main (Banco de Dados)
   if (selectPlano) {
     selectPlano.replaceChildren()
-    cachePlanos.forEach((p) => {
-      const opt = document.createElement('option')
-      opt.value = p.id.toString()
-      opt.dataset.duracao = p.duracao_meses.toString()
-      opt.textContent = p.nome
-      selectPlano.appendChild(opt)
-    })
+
+    const optionVazia = document.createElement('option')
+    optionVazia.value = ''
+    optionVazia.textContent = 'Selecione um plano...'
+    optionVazia.disabled = true
+    optionVazia.selected = true
+    selectPlano.appendChild(optionVazia)
+
+    try {
+      const result = (await window.api.listarPlanos()) as ApiResult<Plano[]>
+      if (result.success && result.data) {
+        setCachePlanos(result.data) // Atualiza o estado global
+        result.data.forEach((p) => {
+          const opt = document.createElement('option')
+          opt.value = p.id.toString()
+          opt.dataset.duracao = p.duracao_meses.toString()
+          opt.textContent = p.nome
+          selectPlano.appendChild(opt)
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao buscar planos:', error)
+    }
   }
 
   atualizarVencimentoCalculado()
@@ -49,6 +83,11 @@ export function atualizarVencimentoCalculado(): void {
   const dataInicio = new Date(inputInicio.value)
   dataInicio.setMonth(dataInicio.getMonth() + duracao)
   inputFim.value = dataInicio.toISOString().split('T')[0]
+
+  const spanVencimento = document.getElementById('span-vencimento-calculado')
+  if (spanVencimento) {
+    spanVencimento.textContent = formatarDataBR(inputFim.value)
+  }
 }
 
 export function initToggleFormMatricula(): void {
@@ -153,8 +192,6 @@ function renderizarTabelaMatriculas(matriculas: MatriculaComNomes[]): void {
     return
   }
 
-  const hoje = new Date().toISOString().split('T')[0]
-
   matriculas.forEach((m) => {
     const tr = document.createElement('tr')
 
@@ -171,18 +208,28 @@ function renderizarTabelaMatriculas(matriculas: MatriculaComNomes[]): void {
     tdFim.textContent = formatarDataBR(m.data_fim_estimada)
 
     const tdStatus = document.createElement('td')
-    const vencida = m.data_fim_estimada < hoje
-    const spanStatus = document.createElement('span')
-    spanStatus.className = `badge ${vencida ? 'badge-vencida' : 'badge-ativa'}`
-    spanStatus.textContent = vencida ? 'Vencida' : 'Ativa'
-    tdStatus.appendChild(spanStatus)
+    const badge = document.createElement('span')
+    const classPorStatus: Record<string, string> = {
+      ativa: 'badge-ativa',
+      inativa: 'badge-inativa',
+      vencida: 'badge-vencida'
+    }
+    const textoPorStatus: Record<string, string> = {
+      ativa: 'Ativa',
+      inativa: 'Inativa',
+      vencida: 'Vencida'
+    }
+    badge.className = `badge ${classPorStatus[m.status] ?? ''}`
+    badge.textContent = textoPorStatus[m.status] ?? m.status
+    tdStatus.appendChild(badge)
 
     const tdAcoes = document.createElement('td')
+
     const btnExcluir = document.createElement('button')
-    btnExcluir.className = 'btn'
-    btnExcluir.textContent = 'Excluir'
+    btnExcluir.className = 'btn-icon danger'
+    btnExcluir.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`
     btnExcluir.addEventListener('click', async () => {
-      if (confirm('Excluir esta matrícula?')) {
+      if (window.confirm('Excluir esta matrícula?')) {
         await window.api.excluirMatricula(m.id)
         await carregarMatriculas()
       }

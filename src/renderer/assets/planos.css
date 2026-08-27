@@ -108,8 +108,8 @@
 
 .btn-contratar-plano {
   align-content: center;
-
-  color: var(--color-primary-text);
+  background: var(--ev-c-gray-3);
+  color: var(--color-white-text);
   border: none;
   border-radius: 20px;
   padding: 10px;

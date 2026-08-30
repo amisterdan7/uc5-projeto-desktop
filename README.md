@@ -19,12 +19,25 @@ Desktop).
 
 ## Como rodar
 
-```bash
+\`\`\`bash
 git clone https://github.com/amisterdan7/uc5-projeto-desktop.git
 cd uc5-projeto-desktop
 npm install
 npm run dev
-```
+\`\`\`
+
+## Build e empacotamento
+
+Este projeto usa o template `electron-vite`, que separa compilação de
+empacotamento em dois comandos distintos:
+
+\`\`\`bash
+npm run build      # Compila o projeto (typecheck + main/preload/renderer) para out/. Não gera instalador.
+npm run build:win  # Roda o build acima e empacota com electron-builder, gerando o instalador .exe em release/
+\`\`\`
+
+Para gerar o instalador Windows (`.exe`), sempre use `npm run build:win` —
+`npm run build` sozinho só compila o código, sem empacotar.
 
 ## 🗄️ Modelagem do Banco de Dados (PostgreSQL)
 
@@ -32,7 +45,7 @@ A aplicação utiliza um banco de dados relacional PostgreSQL estruturado em tr�
 
 # 📐 Diagrama de Relacionamento (ER)
 
-```text
+\`\`\`text
   +------------------+         +----------------------+         +-------------------+
   |      ALUNOS      |         |      MATRÍCULAS      |         |      PLANOS       |
   +------------------+         +----------------------+         +-------------------+
@@ -43,5 +56,4 @@ A aplicação utiliza um banco de dados relacional PostgreSQL estruturado em tr�
   +------------------+         | data_fim_estimada    |         +-------------------+
                                | status               |
                                +----------------------+
-
-```
+\`\`\`

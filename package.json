@@ -48,12 +48,13 @@
     },
     "extraResources": [
       {
-        "from": ".env", "to": ".env"
+        "from": ".env",
+        "to": ".env"
       }
     ],
     "files": [
-    "out/**/*",
-    "package.json"
+      "out/**/*",
+      "package.json"
     ],
     "win": {
       "target": "nsis",

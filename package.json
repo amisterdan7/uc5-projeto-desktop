@@ -39,5 +39,31 @@
     "prettier": "^3.7.4",
     "typescript": "^5.9.3",
     "vite": "^7.2.6"
+  },
+  "build": {
+    "appId": "br.com.amisterdan7.academiamisterfitt",
+    "productName": "Academia Misterfit",
+    "directories": {
+      "output": "release"
+    },
+    "extraResources": [
+      {
+        "from": ".env", "to": ".env"
+      }
+    ],
+    "files": [
+    "out/**/*",
+    "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }

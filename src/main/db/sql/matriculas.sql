@@ -9,3 +9,4 @@ CREATE TABLE matriculas (
   status VARCHAR(20) NOT NULL DEFAULT 'ativa' CHECK (status IN ('ativa', 'inativa'))
 );
 
+  

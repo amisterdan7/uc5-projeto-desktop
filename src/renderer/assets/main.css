@@ -533,3 +533,7 @@ tr:hover td {
   border-color: var(--primary);
   color: #fff;
 }
+
+label {
+  pointer-events: none; /* Faz o clique atravessar o texto e acertar o input */
+}

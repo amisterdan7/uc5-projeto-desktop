@@ -18,6 +18,11 @@ function initNavigation(): void {
       })
     })
   })
+
+  const itemPadrao =
+    document.querySelector<HTMLButtonElement>('.nav-item[data-view="planos"]') || navItems[0]
+
+  itemPadrao?.click()
 }
 
 function init(): void {

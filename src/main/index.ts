@@ -1,7 +1,6 @@
 import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
 import { testConnection } from './db/connection'
 import { criarAluno, listarAlunos, atualizarAluno, excluirAluno } from './db/alunos_repository'
 import { criarPlano, listarPlanos, atualizarPlano, excluirPlano } from './db/planos_repository'
@@ -22,7 +21,6 @@ function createWindow(): void {
     minHeight: 600,
     center: true,
     show: false,
-    ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

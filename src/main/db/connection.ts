@@ -1,7 +1,13 @@
 import { Pool } from 'pg'
 import dotenv from 'dotenv'
+import { app } from 'electron'
+import { join } from 'path'
 
-dotenv.config()
+const caminhoEnv = app.isPackaged
+  ? join(process.resourcesPath, '.env')
+  : join(app.getAppPath(), '.env')
+
+dotenv.config({ path: caminhoEnv })
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,

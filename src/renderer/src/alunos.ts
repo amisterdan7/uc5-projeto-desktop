@@ -74,7 +74,7 @@ export async function carregarAlunos(): Promise<void> {
     } else {
       renderizarTabelaAlunos(cacheAlunos, false)
     }
-  } catch (err: unknown) {
+  } catch (err) {
     const msg = err instanceof Error ? err.message : 'Erro inesperado de comunicação📡'
     exibirMensagemTabela(tbody, msg, 'erro')
   }

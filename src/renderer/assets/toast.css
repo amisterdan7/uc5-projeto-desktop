@@ -1,0 +1,45 @@
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.toast {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: translateX(20px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+  max-width: 340px;
+}
+
+.toast-visivel {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-sucesso {
+  border-left-color: var(--chart-3);
+}
+
+.toast-erro {
+  border-left-color: var(--destructive);
+}
+
+.toast-aviso {
+  border-left-color: var(--primary);
+}

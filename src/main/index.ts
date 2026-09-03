@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { testConnection } from './db/connection'
-import { criarAluno, listarAlunos, atualizarAluno, excluirAluno } from './db/alunos_repository'
+import { criarAluno, listarAlunos, atualizarAluno, excluirAluno, desativarAlunoTemporariamente, reativarAluno } from './db/alunos_repository'
 import { criarPlano, listarPlanos, atualizarPlano, excluirPlano } from './db/planos_repository'
 import {
   listarMatriculas,
@@ -11,6 +11,9 @@ import {
   excluirMatricula
 } from './db/matriculas_repository'
 import { comTratamento, registrarErro } from './erros'
+import dns from 'dns'
+
+dns.setDefaultResultOrder('ipv4first')
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -96,6 +99,21 @@ app.whenReady().then(async () => {
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
+  })
+  ipcMain.handle('alunos:desativar', async (_e, id) => {
+    try {
+      return { success: true, data: await desativarAlunoTemporariamente(id) }
+    } catch (error) {
+      return { success: false, error: (error as Error).message }
+    }
+  })
+
+  ipcMain.handle('alunos:reativar', async (_e, id) => {
+    try {
+      return { success: true, data: await reativarAluno(id) }
+    } catch (error) {
+      return { success: false, error: (error as Error).message }
+    }
   })
 
   try {

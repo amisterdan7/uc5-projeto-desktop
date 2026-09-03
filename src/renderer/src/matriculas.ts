@@ -2,6 +2,7 @@ import type { MatriculaComNomes, ApiResult, Plano, AlunoListado } from './types'
 import { setCacheMatriculas, setCacheAlunos, setCachePlanos } from './state'
 import { formatarDataBR, exibirMensagemTabela } from './utils'
 import { irParaView } from './state'
+import { mostrarToast } from './utils'
 
 export async function popularMatricula(): Promise<void> {
   const selectAluno = document.getElementById('select-aluno') as HTMLSelectElement | null
@@ -123,7 +124,7 @@ export function initFormMatricula(): void {
     const dataInicio = (document.getElementById('input-data-inicio') as HTMLInputElement).value
 
     if (!idAluno || !idPlano || !dataInicio) {
-      alert('Preencha aluno, plano e data de início.')
+      mostrarToast('Preencha aluno, plano e data de início.')
       return
     }
 
@@ -134,12 +135,12 @@ export function initFormMatricula(): void {
     })
 
     if (result.success) {
-      alert('Matrícula criada com sucesso!')
+      mostrarToast('Matrícula criada com sucesso!')
       form.reset()
       form.hidden = true
       await carregarMatriculas()
     } else {
-      alert(`Erro ao matricular: ${result.error?.message ?? 'Falha'}`)
+      mostrarToast(`Erro ao matricular: ${result.error?.message ?? 'Falha'}`)
     }
   })
 }
@@ -245,4 +246,18 @@ function renderizarTabelaMatriculas(matriculas: MatriculaComNomes[]): void {
 
     tbody.appendChild(tr)
   })
+}
+
+export async function iniciarMatriculaParaAluno(idAluno: number): Promise<void> {
+  irParaView('matriculas')
+  await popularMatricula()
+
+  const selectAluno = document.getElementById('select-aluno') as HTMLSelectElement
+  selectAluno.value = idAluno.toString()
+
+  const form = document.getElementById('form-matricula') as HTMLFormElement
+  form.hidden = false
+
+  atualizarVencimentoCalculado()
+  document.getElementById('select-plano')?.focus()
 }

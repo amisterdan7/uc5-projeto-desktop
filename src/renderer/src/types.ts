@@ -10,6 +10,11 @@ export interface AlunoListado extends Aluno {
   status_matricula: 'ativa' | 'inativa' | 'vencida' | 'sem_matricula'
 }
 
+export interface AlunoListado extends Aluno {
+  plano_nome: string | null
+  status_matricula: 'ativa' | 'inativa' | 'vencida' | 'sem_matricula'
+  ativo: boolean
+}
 export interface Plano {
   id: number
   nome: string

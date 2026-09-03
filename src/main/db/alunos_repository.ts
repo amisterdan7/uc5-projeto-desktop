@@ -25,7 +25,7 @@ export async function criarAluno(aluno: Omit<Aluno, 'id'>): Promise<Aluno> {
 export async function listarAlunos(): Promise<AlunoListado[]> {
   const result = await pool.query(`
     SELECT
-      a.id, a.nome, a.data_nascimento, a.telefone,
+      a.id, a.nome, a.data_nascimento, a.telefone, a.ativo,
       p.nome AS plano_nome,
       CASE
         WHEN m.id IS NULL THEN 'sem_matricula'
@@ -39,7 +39,7 @@ export async function listarAlunos(): Promise<AlunoListado[]> {
     ) m ON true
     LEFT JOIN planos p ON p.id = m.id_plano
     ORDER BY a.nome
-    `)
+  `)
   return result.rows
 }
 
@@ -55,4 +55,12 @@ export async function atualizarAluno(id: number, aluno: Omit<Aluno, 'id'>): Prom
 
 export async function excluirAluno(id: number): Promise<void> {
   await pool.query(`DELETE FROM alunos WHERE id = $1`, [id])
+}
+
+export async function desativarAlunoTemporariamente(id: number): Promise<void> {
+  await pool.query(`UPDATE alunos SET ativo = FALSE WHERE id = $1`, [id])
+}
+
+export async function reativarAluno(id: number): Promise<void> {
+  await pool.query(`UPDATE alunos SET ativo = TRUE WHERE id = $1`, [id])
 }

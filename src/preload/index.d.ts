@@ -52,6 +52,7 @@ interface AlunoListado extends Aluno {
 }
 
 export interface Api {
+  reativarAluno: any
   showWarning(mensagem: string): unknown
   showError(mensagem: string): unknown
   testConnection: () => Promise<boolean>
@@ -77,6 +78,8 @@ export interface Api {
     plano: Omit<Plano, 'id'>
   ) => Promise<{ success: boolean; data?: Plano; error?: ApiError }>
   excluirPlano: (id: number) => Promise<{ success: boolean; error?: ApiError }>
+
+  desativarAlunoTemporariamente: (id: number) => Promise<{ success: boolean; error?: ApiError }>
 
   // Matrículas
   criarMatricula: (matricula: {

@@ -19,3 +19,32 @@ export function exibirMensagemTabela(
   tr.appendChild(td)
   tbody.appendChild(tr)
 }
+
+// função para pop-up
+export type TipoToast = 'sucesso' | 'erro' | 'aviso'
+
+export function mostrarToast(mensagem: string, tipo: TipoToast = 'sucesso'): void {
+  const container = document.getElementById('toast-container') ?? criarContainerToast()
+
+  const toast = document.createElement('div')
+  toast.className = `toast toast-${tipo}`
+  toast.textContent = mensagem
+
+  container.appendChild(toast)
+
+  requestAnimationFrame(() => {
+    toast.classList.add('toast-visivel')
+  })
+
+  setTimeout(() => {
+    toast.classList.remove('toast-visivel')
+    setTimeout(() => toast.remove(), 500)
+  }, 3500)
+}
+
+function criarContainerToast(): HTMLElement {
+  const container = document.createElement('div')
+  container.id = 'toast-container'
+  document.body.appendChild(container)
+  return container
+}

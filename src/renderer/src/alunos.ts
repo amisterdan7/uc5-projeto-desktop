@@ -6,14 +6,13 @@ import {
   setPlanoSelecionadoParaMatricula,
   irParaView
 } from './state'
-import { exibirMensagemTabela } from './utils'
-import { continuarParaMatricula } from './matriculas'
+import { exibirMensagemTabela, mostrarToast } from './utils'
+import { continuarParaMatricula, iniciarMatriculaParaAluno } from './matriculas'
 
 export function iniciarContratacaoPlano(idPlano: number): void {
   setPlanoSelecionadoParaMatricula(idPlano)
   irParaView('alunos')
 
-  // Mostra o formulário de cadastro de aluno quando o usuário clica em "Contratar Plano"
   const form = document.getElementById('form-aluno') as HTMLFormElement
   if (form) form.hidden = false
 
@@ -106,8 +105,10 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
     const tdPlano = document.createElement('td')
     tdPlano.textContent = aluno.plano_nome ?? '-'
 
+    // --- STATUS (BADGE) ---
     const tdStatus = document.createElement('td')
     const badge = document.createElement('span')
+    
     const classePorStatus: Record<string, string> = {
       ativa: 'badge-ativa',
       vencida: 'badge-vencida',
@@ -120,43 +121,90 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
       inativa: 'Inativo',
       sem_matricula: 'Sem plano'
     }
+
+    // Lógica para saber se usa o status do banco (ativo/desativado) ou da matrícula
+    if (aluno.ativo === false) {
+      badge.className = 'badge badge-inativa'
+      badge.textContent = 'Desativado'
+    } else {
+      badge.className = `badge ${classePorStatus[aluno.status_matricula] ?? 'badge-inativa'}`
+      badge.textContent = textoPorStatus[aluno.status_matricula] ?? aluno.status_matricula
+    }
     tdStatus.appendChild(badge)
 
-    badge.className = `badge ${classePorStatus[aluno.status_matricula] ?? 'badge-inativa'}`
-    badge.textContent = textoPorStatus[aluno.status_matricula] ?? aluno.status_matricula
-    tdStatus.appendChild(badge)
+    // --- COLUNA DE AÇÕES ---
+    // A coluna tdAcoes PRECISA ser criada antes de adicionarmos os botões nela!
+    const tdAcoes = document.createElement('td')
+    tdAcoes.style.display = 'flex'
+    tdAcoes.style.gap = '4px'
 
+    // 1. Botão Editar
     const btnEditar = document.createElement('button')
     btnEditar.className = 'btn-icon'
-
+    btnEditar.title = 'Editar Aluno'
     btnEditar.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>`
     btnEditar.addEventListener('click', () => {
       const form = document.getElementById('form-aluno') as HTMLFormElement
       form.hidden = false
 
-      // 1. Guarda o ID do aluno no formulário para usarmos no submit
       form.dataset.editId = aluno.id.toString()
-
-      // 2. Preenche os campos
       ;(document.getElementById('input-nome') as HTMLInputElement).value = aluno.nome
       ;(document.getElementById('input-telefone') as HTMLInputElement).value = aluno.telefone ?? ''
 
-      // A data que vem do banco precisa ser formatada para YYYY-MM-DD para o input type="date"
       if (aluno.data_nascimento) {
         const dataFormatada = new Date(aluno.data_nascimento).toISOString().split('T')[0]
         ;(document.getElementById('input-nascimento') as HTMLInputElement).value = dataFormatada
       }
 
-      // Muda o texto do botão de Salvar para Atualizar
       const btnSubmit = form.querySelector('button[type="submit"]')
       if (btnSubmit) btnSubmit.textContent = 'Atualizar'
+
+      const btnGerenciarPlano = document.getElementById('btn-gerenciar-plano') as HTMLButtonElement
+      if (btnGerenciarPlano) {
+        if (aluno.status_matricula === 'sem_matricula' || aluno.status_matricula === 'vencida') {
+          btnGerenciarPlano.hidden = false
+          btnGerenciarPlano.textContent = aluno.status_matricula === 'vencida' ? '🔄 Renovar Plano' : '➕ Adicionar Plano'
+          btnGerenciarPlano.onclick = async () => {
+            await iniciarMatriculaParaAluno(aluno.id)
+          }
+        } else {
+          btnGerenciarPlano.hidden = true
+        }
+      }
 
       window.scrollTo({ top: 0, behavior: 'smooth' })
     })
 
-    const tdAcoes = document.createElement('td')
+    // 2. Botão Desativar/Reativar
+    const btnStatus = document.createElement('button')
+    btnStatus.className = 'btn-icon'
+    
+    if (aluno.ativo === false) {
+      btnStatus.title = 'Reativar aluno'
+      btnStatus.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+      btnStatus.addEventListener('click', async () => {
+        if (confirm(`Deseja reativar o aluno ${aluno.nome}?`)) {
+          // @ts-ignore
+          await window.api.reativarAluno(aluno.id)
+          await carregarAlunos()
+        }
+      })
+    } else {
+      btnStatus.title = 'Desativar temporariamente'
+      btnStatus.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+      btnStatus.addEventListener('click', async () => {
+        if (confirm(`Desativar temporariamente o aluno ${aluno.nome}?`)) {
+          // @ts-ignore
+          await window.api.desativarAlunoTemporariamente(aluno.id)
+          await carregarAlunos()
+        }
+      })
+    }
+
+    // 3. Botão Excluir
     const btnExcluir = document.createElement('button')
     btnExcluir.className = 'btn-icon danger'
+    btnExcluir.title = 'Excluir Aluno'
     btnExcluir.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`
     btnExcluir.dataset.id = aluno.id.toString()
     btnExcluir.addEventListener('click', async () => {
@@ -165,7 +213,10 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
         await carregarAlunos()
       }
     })
+
+    // Coloca os botões na coluna, e a coluna na linha!
     tdAcoes.appendChild(btnEditar)
+    tdAcoes.appendChild(btnStatus)
     tdAcoes.appendChild(btnExcluir)
 
     tr.appendChild(tdNome)
@@ -196,9 +247,13 @@ export async function initFormAluno(): Promise<void> {
       const btnSubmit = form.querySelector('button[type="submit"]')
       if (btnSubmit) btnSubmit.textContent = 'Salvar'
 
+      const btnGerenciarPlano = document.getElementById('btn-gerenciar-plano') as HTMLButtonElement
+      if (btnGerenciarPlano) btnGerenciarPlano.hidden = true
+
       document.getElementById('input-nome')?.focus()
     }
   })
+
   document.getElementById('btn-cancelar')?.addEventListener('click', () => {
     if (form) {
       form.reset()
@@ -214,23 +269,25 @@ export async function initFormAluno(): Promise<void> {
 
     const nome = (document.getElementById('input-nome') as HTMLInputElement).value.trim()
     const telefone = (document.getElementById('input-telefone') as HTMLInputElement).value.trim()
-    const nascimento = (
-      document.getElementById('input-nascimento') as HTMLInputElement
-    ).value.trim()
+    const nascimento = (document.getElementById('input-nascimento') as HTMLInputElement).value.trim()
 
-    // Validação do telefone (opcional), Aperfeiçoar para aceitar o tamanho correto e o formato com DDD
     const telefoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/
     if (telefone && !telefoneRegex.test(telefone)) {
-      alert('Telefone inválido. Utilize formato com DDD (ex: (84) 99999-0000).')
+      mostrarToast('Telefone inválido. Utilize formato com DDD (ex: (84) 99999-0000).')
       return
     }
 
     if (!nome || !nascimento) {
-      alert('Por favor, preencha todos os campos obrigatórios.')
+      mostrarToast('Por favor, preencha todos os campos obrigatórios.')
       return
     }
 
-    // Verifica se estamos editando um aluno existente ou criando um novo
+    const hoje = new Date().toISOString().split('T')[0]
+    if (nascimento >= hoje) {
+      mostrarToast('Data de nascimento não pode ser no futuro.')
+      return
+    }
+
     const editId = form.dataset.editId
 
     if (editId) {
@@ -241,10 +298,10 @@ export async function initFormAluno(): Promise<void> {
       })
 
       if (!result.success || !result.data) {
-        alert(`Erro ao atualizar aluno: ${result.error?.message}`)
+        mostrarToast(`Erro ao atualizar aluno: ${result.error?.message}`)
         return
       }
-      alert('Aluno atualizado com sucesso!')
+      mostrarToast('Aluno atualizado com sucesso!')
 
       delete form.dataset.editId
       const btnSubmit = form.querySelector('button[type="submit"]')
@@ -253,7 +310,7 @@ export async function initFormAluno(): Promise<void> {
       const result = await window.api.criarAluno({ nome, telefone, data_nascimento: nascimento })
 
       if (!result.success || !result.data) {
-        alert(`Erro ao criar aluno: ${result.error?.message ?? 'Falha inesperada.'}`)
+        mostrarToast(`Erro ao criar aluno: ${result.error?.message ?? 'Falha inesperada.'}`)
         return
       }
 
@@ -263,10 +320,11 @@ export async function initFormAluno(): Promise<void> {
         await continuarParaMatricula(idPlano, result.data.id)
         return
       } else {
-        alert('Aluno cadastrado com sucesso!')
+        mostrarToast('Aluno cadastrado com sucesso!')
       }
     }
     form.reset()
+    form.hidden = true
     await carregarAlunos()
 
     const aviso = document.getElementById('aviso-plano-selecionado')

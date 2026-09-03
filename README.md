@@ -32,8 +32,8 @@ Este projeto usa o template `electron-vite`, que separa compilação de
 empacotamento em dois comandos distintos:
 
 \`\`\`bash
-npm run build      # Compila o projeto (typecheck + main/preload/renderer) para out/. Não gera instalador.
-npm run build:win  # Roda o build acima e empacota com electron-builder, gerando o instalador .exe em release/
+npm run build # Compila o projeto (typecheck + main/preload/renderer) para out/. Não gera instalador.
+npm run build:win # Roda o build acima e empacota com electron-builder, gerando o instalador .exe em release/
 \`\`\`
 
 Para gerar o instalador Windows (`.exe`), sempre use `npm run build:win` —
@@ -46,14 +46,13 @@ A aplicação utiliza um banco de dados relacional PostgreSQL estruturado em tr�
 # 📐 Diagrama de Relacionamento (ER)
 
 \`\`\`text
-  +------------------+         +----------------------+         +-------------------+
-  |      ALUNOS      |         |      MATRÍCULAS      |         |      PLANOS       |
-  +------------------+         +----------------------+         +-------------------+
-  | id (PK)          |<-------1| id (PK)              |         | id (PK)           |
-  | nome             |         | id_aluno (FK)        |         | nome              |
-  | data_nascimento  |         | id_plano (FK)        |-------->| preco             |
-  | telefone         |         | data_inicio          |         | duracao_meses     |
-  +------------------+         | data_fim_estimada    |         +-------------------+
-                               | status               |
-                               +----------------------+
-
++------------------+ +----------------------+ +-------------------+
+| ALUNOS | | MATRÍCULAS | | PLANOS |
++------------------+ +----------------------+ +-------------------+
+| id (PK) |<-------1| id (PK) | | id (PK) |
+| nome | | id_aluno (FK) | | nome |
+| data_nascimento | | id_plano (FK) |-------->| preco |
+| telefone | | data_inicio | | duracao_meses |
++------------------+ | data_fim_estimada | +-------------------+
+| status |
++----------------------+

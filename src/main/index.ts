@@ -2,7 +2,14 @@ import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { testConnection } from './db/connection'
-import { criarAluno, listarAlunos, atualizarAluno, excluirAluno, desativarAlunoTemporariamente, reativarAluno } from './db/alunos_repository'
+import {
+  criarAluno,
+  listarAlunos,
+  atualizarAluno,
+  excluirAluno,
+  desativarAlunoTemporariamente,
+  reativarAluno
+} from './db/alunos_repository'
 import { criarPlano, listarPlanos, atualizarPlano, excluirPlano } from './db/planos_repository'
 import {
   listarMatriculas,

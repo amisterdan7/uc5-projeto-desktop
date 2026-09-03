@@ -292,12 +292,11 @@ input:disabled {
   border: 1px solid transparent;
   transition: all 0.2s;
 
-  display: inline-flex;       /* Permite alinhar itens lado a lado perfeitamente */
-  align-items: center;        /* Centraliza o texto e o emoji na vertical */
-  justify-content: center;    /* Centraliza na horizontal */
-  gap: 8px;                   /* Dá um espacinho elegante entre o emoji e o texto */
+  display: inline-flex; /* Permite alinhar itens lado a lado perfeitamente */
+  align-items: center; /* Centraliza o texto e o emoji na vertical */
+  justify-content: center; /* Centraliza na horizontal */
+  gap: 8px; /* Dá um espacinho elegante entre o emoji e o texto */
   white-space: nowrap;
-  
 }
 
 .btn-primary {
@@ -555,9 +554,7 @@ tr:hover td {
 
 label {
   pointer-events: none;
-
 }
-
 
 .form-input {
   width: 100%;
@@ -572,9 +569,8 @@ label {
   font-family: inherit;
 }
 
-
 select.form-input {
-  appearance: none; 
+  appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -583,7 +579,6 @@ select.form-input {
   background-size: 1em;
   padding-right: 2.5rem;
 }
-
 
 select.form-input option {
   background-color: #2a2a2a;
@@ -595,7 +590,6 @@ select.form-input option {
   border-color: var(--primary, #d85a30);
   box-shadow: 0 0 0 3px rgba(216, 90, 48, 0.15);
 }
-
 
 .form-input:disabled {
   background-color: #111111;

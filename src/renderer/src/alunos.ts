@@ -108,7 +108,7 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
     // --- STATUS (BADGE) ---
     const tdStatus = document.createElement('td')
     const badge = document.createElement('span')
-    
+
     const classePorStatus: Record<string, string> = {
       ativa: 'badge-ativa',
       vencida: 'badge-vencida',
@@ -163,7 +163,8 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
       if (btnGerenciarPlano) {
         if (aluno.status_matricula === 'sem_matricula' || aluno.status_matricula === 'vencida') {
           btnGerenciarPlano.hidden = false
-          btnGerenciarPlano.textContent = aluno.status_matricula === 'vencida' ? '🔄 Renovar Plano' : '➕ Adicionar Plano'
+          btnGerenciarPlano.textContent =
+            aluno.status_matricula === 'vencida' ? '🔄 Renovar Plano' : '➕ Adicionar Plano'
           btnGerenciarPlano.onclick = async () => {
             await iniciarMatriculaParaAluno(aluno.id)
           }
@@ -178,13 +179,12 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
     // 2. Botão Desativar/Reativar
     const btnStatus = document.createElement('button')
     btnStatus.className = 'btn-icon'
-    
+
     if (aluno.ativo === false) {
       btnStatus.title = 'Reativar aluno'
       btnStatus.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
       btnStatus.addEventListener('click', async () => {
         if (confirm(`Deseja reativar o aluno ${aluno.nome}?`)) {
-          // @ts-ignore
           await window.api.reativarAluno(aluno.id)
           await carregarAlunos()
         }
@@ -194,7 +194,6 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
       btnStatus.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
       btnStatus.addEventListener('click', async () => {
         if (confirm(`Desativar temporariamente o aluno ${aluno.nome}?`)) {
-          // @ts-ignore
           await window.api.desativarAlunoTemporariamente(aluno.id)
           await carregarAlunos()
         }
@@ -269,7 +268,9 @@ export async function initFormAluno(): Promise<void> {
 
     const nome = (document.getElementById('input-nome') as HTMLInputElement).value.trim()
     const telefone = (document.getElementById('input-telefone') as HTMLInputElement).value.trim()
-    const nascimento = (document.getElementById('input-nascimento') as HTMLInputElement).value.trim()
+    const nascimento = (
+      document.getElementById('input-nascimento') as HTMLInputElement
+    ).value.trim()
 
     const telefoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/
     if (telefone && !telefoneRegex.test(telefone)) {

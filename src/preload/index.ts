@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld('api', {
   // Matrículas
   criarMatricula: (matricula) => ipcRenderer.invoke('matriculas:criar', matricula),
   listarMatriculas: () => ipcRenderer.invoke('matriculas:listar'),
-  atualizarStatusMatricula: (id, status) => ipcRenderer.invoke('matriculas:atualizar-status', id, status),
+  atualizarStatusMatricula: (id, status) =>
+    ipcRenderer.invoke('matriculas:atualizar-status', id, status),
   excluirMatricula: (id) => ipcRenderer.invoke('matriculas:excluir', id)
 })

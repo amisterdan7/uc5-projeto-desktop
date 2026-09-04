@@ -196,6 +196,11 @@ function renderizarTabelaMatriculas(matriculas: MatriculaComNomes[]): void {
   matriculas.forEach((m) => {
     const tr = document.createElement('tr')
 
+    // --- Efeito visual de linha apagada (Arquivada) ---
+    if (m.status === 'inativa') {
+      tr.classList.add('linha-arquivada')
+    }
+
     const tdAluno = document.createElement('td')
     tdAluno.textContent = m.aluno_nome
 
@@ -208,8 +213,10 @@ function renderizarTabelaMatriculas(matriculas: MatriculaComNomes[]): void {
     const tdFim = document.createElement('td')
     tdFim.textContent = formatarDataBR(m.data_fim_estimada)
 
+    // --- STATUS (BADGE) ---
     const tdStatus = document.createElement('td')
     const badge = document.createElement('span')
+
     const classPorStatus: Record<string, string> = {
       ativa: 'badge-ativa',
       inativa: 'badge-inativa',
@@ -220,22 +227,58 @@ function renderizarTabelaMatriculas(matriculas: MatriculaComNomes[]): void {
       inativa: 'Inativa',
       vencida: 'Vencida'
     }
-    badge.className = `badge ${classPorStatus[m.status] ?? ''}`
+
+    badge.className = `badge ${classPorStatus[m.status] ?? 'badge-inativa'}`
     badge.textContent = textoPorStatus[m.status] ?? m.status
     tdStatus.appendChild(badge)
 
+    // --- COLUNA DE AÇÕES ---
     const tdAcoes = document.createElement('td')
+    tdAcoes.style.display = 'flex'
+    tdAcoes.style.gap = '8px'
+
+    const btnStatus = document.createElement('button')
+    btnStatus.className = 'btn-icon'
+
+    if (m.status === 'inativa') {
+      btnStatus.title = 'Reativar matrícula'
+      btnStatus.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>`
+      btnStatus.addEventListener('click', async () => {
+        if (confirm(`Deseja reativar a matrícula de ${m.aluno_nome}?`)) {
+          await window.api.atualizarStatusMatricula(m.id, 'ativa')
+          await carregarMatriculas()
+        }
+      })
+    } else {
+      btnStatus.title = 'Inativar/Cancelar matrícula'
+      btnStatus.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>`
+      btnStatus.addEventListener('click', async () => {
+        if (confirm(`Deseja inativar a matrícula de ${m.aluno_nome}?`)) {
+          await window.api.atualizarStatusMatricula(m.id, 'inativa')
+          await carregarMatriculas()
+        }
+      })
+    }
 
     const btnExcluir = document.createElement('button')
     btnExcluir.className = 'btn-icon danger'
+    btnExcluir.title = 'Excluir Permanentemente'
     btnExcluir.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`
     btnExcluir.addEventListener('click', async () => {
-      if (window.confirm('Excluir esta matrícula?')) {
+      if (
+        window.confirm(
+          'ATENÇÃO: Excluir esta matrícula apagará o registro definitivamente. Deseja continuar?'
+        )
+      ) {
         await window.api.excluirMatricula(m.id)
         await carregarMatriculas()
       }
     })
-    tdAcoes.appendChild(btnExcluir)
+
+    tdAcoes.appendChild(btnStatus)
+    if (m.status === 'inativa') {
+      tdAcoes.appendChild(btnExcluir)
+    }
 
     tr.appendChild(tdAluno)
     tr.appendChild(tdPlano)

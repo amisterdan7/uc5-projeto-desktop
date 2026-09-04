@@ -66,3 +66,11 @@ export async function atualizarStatusMatricula(
 export async function excluirMatricula(id: number): Promise<void> {
   await pool.query('DELETE  FROM matriculas WHERE id = $1', [id])
 }
+
+export async function reativarMatricula(id: number): Promise<void> {
+  await pool.query(`UPDATE matriculas SET status = 'ativa' WHERE id = $1`, [id])
+}
+
+export async function desativarMatriculaTemporariamente(id: number): Promise<void> {
+  await pool.query(`UPDATE matriculas SET status = 'inativa' WHERE id = $1`, [id])
+}

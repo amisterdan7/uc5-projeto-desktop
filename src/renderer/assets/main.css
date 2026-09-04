@@ -374,6 +374,20 @@ input:disabled {
   color: var(--destructive);
 }
 
+tr.linha-arquivada {
+  opacity: 0.45;
+  transition: opacity 0.2s ease;
+}
+
+tr.linha-arquivada:hover {
+  opacity: 0.8;
+}
+
+.badge-inativa {
+  background-color: rgba(161, 161, 170, 0.15);
+  color: #a1a1aa;
+}
+
 .table-container {
   background-color: var(--card);
   border-radius: var(--radius-lg);

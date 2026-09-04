@@ -96,6 +96,11 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
   alunos.forEach((aluno) => {
     const tr = document.createElement('tr')
 
+    // --- NOVIDADE 1: Efeito fantasma na linha ---
+    if (aluno.ativo === false) {
+      tr.classList.add('linha-arquivada')
+    }
+
     const tdNome = document.createElement('td')
     tdNome.textContent = aluno.nome
 
@@ -122,10 +127,9 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
       sem_matricula: 'Sem plano'
     }
 
-    // Lógica para saber se usa o status do banco (ativo/desativado) ou da matrícula
     if (aluno.ativo === false) {
       badge.className = 'badge badge-inativa'
-      badge.textContent = 'Desativado'
+      badge.textContent = 'Arquivado' // Mudamos de "Desativado" para "Arquivado"
     } else {
       badge.className = `badge ${classePorStatus[aluno.status_matricula] ?? 'badge-inativa'}`
       badge.textContent = textoPorStatus[aluno.status_matricula] ?? aluno.status_matricula
@@ -133,12 +137,11 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
     tdStatus.appendChild(badge)
 
     // --- COLUNA DE AÇÕES ---
-    // A coluna tdAcoes PRECISA ser criada antes de adicionarmos os botões nela!
     const tdAcoes = document.createElement('td')
     tdAcoes.style.display = 'flex'
-    tdAcoes.style.gap = '4px'
+    tdAcoes.style.gap = '8px' // Mais espaço para respirar
 
-    // 1. Botão Editar
+    // 1. Botão Editar (Igual ao seu)
     const btnEditar = document.createElement('button')
     btnEditar.className = 'btn-icon'
     btnEditar.title = 'Editar Aluno'
@@ -172,51 +175,57 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
           btnGerenciarPlano.hidden = true
         }
       }
-
       window.scrollTo({ top: 0, behavior: 'smooth' })
     })
 
-    // 2. Botão Desativar/Reativar
     const btnStatus = document.createElement('button')
     btnStatus.className = 'btn-icon'
 
     if (aluno.ativo === false) {
-      btnStatus.title = 'Reativar aluno'
-      btnStatus.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+      btnStatus.title = 'Restaurar aluno'
+      // Ícone de "Seta de Restaurar / Upload"
+      btnStatus.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>`
       btnStatus.addEventListener('click', async () => {
-        if (confirm(`Deseja reativar o aluno ${aluno.nome}?`)) {
+        if (confirm(`Deseja restaurar o cadastro de ${aluno.nome}?`)) {
           await window.api.reativarAluno(aluno.id)
           await carregarAlunos()
         }
       })
     } else {
-      btnStatus.title = 'Desativar temporariamente'
-      btnStatus.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+      btnStatus.title = 'Arquivar aluno'
+      // Ícone de "Caixa de Arquivo"
+      btnStatus.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>`
       btnStatus.addEventListener('click', async () => {
-        if (confirm(`Desativar temporariamente o aluno ${aluno.nome}?`)) {
+        if (confirm(`Deseja arquivar os dados de ${aluno.nome}?`)) {
           await window.api.desativarAlunoTemporariamente(aluno.id)
           await carregarAlunos()
         }
       })
     }
 
-    // 3. Botão Excluir
+    // 3. Botão Excluir Permanente
     const btnExcluir = document.createElement('button')
     btnExcluir.className = 'btn-icon danger'
-    btnExcluir.title = 'Excluir Aluno'
+    btnExcluir.title = 'Excluir Permanentemente'
     btnExcluir.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`
     btnExcluir.dataset.id = aluno.id.toString()
     btnExcluir.addEventListener('click', async () => {
-      if (confirm(`Excluir o aluno ${aluno.nome}?`)) {
+      if (
+        confirm(
+          `ATENÇÃO: Excluir ${aluno.nome} apagará todos os registros definitivamente. Deseja continuar?`
+        )
+      ) {
         await window.api.excluirAluno(aluno.id)
         await carregarAlunos()
       }
     })
 
-    // Coloca os botões na coluna, e a coluna na linha!
     tdAcoes.appendChild(btnEditar)
     tdAcoes.appendChild(btnStatus)
-    tdAcoes.appendChild(btnExcluir)
+
+    if (aluno.ativo === false) {
+      tdAcoes.appendChild(btnExcluir)
+    }
 
     tr.appendChild(tdNome)
     tr.appendChild(tdTelefone)

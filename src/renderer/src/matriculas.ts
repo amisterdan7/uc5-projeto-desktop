@@ -1,5 +1,5 @@
 import type { MatriculaComNomes, ApiResult, Plano, AlunoListado } from './types'
-import { setCacheMatriculas, setCacheAlunos, setCachePlanos } from './state'
+import { setCacheMatriculas, setCacheAlunos, setCachePlanos, podeFazer } from './state'
 import { formatarDataBR, exibirMensagemTabela } from './utils'
 import { irParaView } from './state'
 import { mostrarToast } from './utils'
@@ -22,7 +22,7 @@ export async function popularMatricula(): Promise<void> {
     try {
       const result = (await window.api.listarAlunos()) as ApiResult<AlunoListado[]>
       if (result.success && result.data) {
-        setCacheAlunos(result.data) // Atualiza o estado global
+        setCacheAlunos(result.data)
         result.data.forEach((a) => {
           const opt = document.createElement('option')
           opt.value = a.id.toString()
@@ -35,7 +35,6 @@ export async function popularMatricula(): Promise<void> {
     }
   }
 
-  // 2. Popula Planos buscando direto do Main (Banco de Dados)
   if (selectPlano) {
     selectPlano.replaceChildren()
 
@@ -49,7 +48,7 @@ export async function popularMatricula(): Promise<void> {
     try {
       const result = (await window.api.listarPlanos()) as ApiResult<Plano[]>
       if (result.success && result.data) {
-        setCachePlanos(result.data) // Atualiza o estado global
+        setCachePlanos(result.data)
         result.data.forEach((p) => {
           const opt = document.createElement('option')
           opt.value = p.id.toString()
@@ -196,7 +195,6 @@ function renderizarTabelaMatriculas(matriculas: MatriculaComNomes[]): void {
   matriculas.forEach((m) => {
     const tr = document.createElement('tr')
 
-    // --- Efeito visual de linha apagada (Arquivada) ---
     if (m.status === 'inativa') {
       tr.classList.add('linha-arquivada')
     }
@@ -213,7 +211,6 @@ function renderizarTabelaMatriculas(matriculas: MatriculaComNomes[]): void {
     const tdFim = document.createElement('td')
     tdFim.textContent = formatarDataBR(m.data_fim_estimada)
 
-    // --- STATUS (BADGE) ---
     const tdStatus = document.createElement('td')
     const badge = document.createElement('span')
 
@@ -232,7 +229,6 @@ function renderizarTabelaMatriculas(matriculas: MatriculaComNomes[]): void {
     badge.textContent = textoPorStatus[m.status] ?? m.status
     tdStatus.appendChild(badge)
 
-    // --- COLUNA DE AÇÕES ---
     const tdAcoes = document.createElement('td')
     tdAcoes.style.display = 'flex'
     tdAcoes.style.gap = '8px'
@@ -275,10 +271,8 @@ function renderizarTabelaMatriculas(matriculas: MatriculaComNomes[]): void {
       }
     })
 
-    tdAcoes.appendChild(btnStatus)
-    if (m.status === 'inativa') {
-      tdAcoes.appendChild(btnExcluir)
-    }
+    if (podeFazer('matriculas:atualizar-status')) tdAcoes.appendChild(btnStatus)
+    if (m.status === 'inativa' && podeFazer('matriculas:excluir')) tdAcoes.appendChild(btnExcluir)
 
     tr.appendChild(tdAluno)
     tr.appendChild(tdPlano)

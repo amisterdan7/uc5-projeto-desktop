@@ -4,17 +4,16 @@ Aplicação desktop de controle de academia, feita com Electron, TypeScript e
 PostgreSQL. Projeto Integrador individual da UC5 (Desenvolver Aplicações
 Desktop).
 
+O acesso ao sistema é protegido por login, com dois perfis de usuário:
+**administrador** e **recepcionista**.
+
 ## Funcionalidades
 
-- Cadastro, edição e exclusão de alunos
-- Desativação temporária de alunos (sem excluir o histórico)
-- Cadastro e listagem de planos
+- Cadastro de alunos
+- Cadastro de planos
 - Matrícula de alunos em planos, com cálculo automático da data de término
+- Inativação e reativação de matrículas
 - Listagem de alunos com plano vencido
-- Filtro/busca de alunos por nome ou telefone
-- Tratamento de erros com mensagens amigáveis (falha de conexão, dados
-  duplicados, campos obrigatórios)
-- Registro de logs de erro em arquivo, para diagnóstico pós-instalação
 
 ## Tecnologias
 
@@ -24,75 +23,78 @@ Desktop).
 
 ## Como rodar
 
-- git clone https://github.com/amisterdan7/uc5-projeto-desktop.git
-- npm install
-- npm run dev
-
+\`\`\`bash
+git clone https://github.com/amisterdan7/uc5-projeto-desktop.git
+cd uc5-projeto-desktop
+npm install
+npm run dev
+\`\`\`
 
 ## Build e empacotamento
 
 Este projeto usa o template `electron-vite`, que separa compilação de
 empacotamento em dois comandos distintos:
 
-```
-npm run build      # Compila o projeto (typecheck + main/preload/renderer) para out/. Não gera instalador.
-npm run build:win  # Roda o build acima e empacota com electron-builder, gerando o instalador .exe em release/
-```
+\`\`\`bash
+npm run build # Compila o projeto (typecheck + main/preload/renderer) para out/. Não gera instalador.
+npm run build:win # Roda o build acima e empacota com electron-builder, gerando o instalador .exe em release/
+\`\`\`
 
 Para gerar o instalador Windows (`.exe`), sempre use `npm run build:win` —
 `npm run build` sozinho só compila o código, sem empacotar.
 
+## Estrutura do projeto
+
+```text
+src/
+├── main/                         # Processo principal (Electron)
+│   ├── index.ts                  # Janela, menu e registro dos canais IPC
+│   ├── erros.ts                  # Tratamento de erros e códigos de acesso
+│   ├── auth/
+│   │   ├── senha.ts              # Hash e conferência de senha (scrypt)
+│   │   ├── sessao.ts             # Sessão em memória e tabela de permissões
+│   │   └── ipc.ts                # Login, logout, primeiro acesso e usuários
+│   └── db/                       # Acesso ao PostgreSQL (um repositório por tabela)
+├── preload/
+│   ├── index.ts                  # Ponte segura entre main e renderer
+│   └── index.d.ts                # Tipos de window.api e window.authAPI
+└── renderer/                     # Interface
+    ├── index.html
+    ├── assets/                   # CSS (main.css, auth.css, ...)
+    └── src/                      # alunos, matriculas, planos, usuarios, auth, state...
+```
+
 ## 🗄️ Modelagem do Banco de Dados (PostgreSQL)
 
-A aplicação utiliza um banco de dados relacional PostgreSQL estruturado em
-três tabelas principais para gerenciar alunos, planos e suas respectivas
-matrículas.
+A aplicação utiliza um banco de dados relacional PostgreSQL estruturado em três tabelas principais para gerenciar os alunos, planos e suas respectivas matrículas.
 
 ### 📐 Diagrama de Relacionamento (ER)
 
-```text
-┌───────────────────┐        ┌───────────────────────┐        ┌───────────────────┐
-│      ALUNOS       │        │      MATRÍCULAS       │        │       PLANOS      │
-├───────────────────┤        ├───────────────────────┤        ├───────────────────┤
-│ id (PK)           │◄───────┤ id_aluno (FK)         │        │ id (PK)           │
-│ nome              │        │ id (PK)               │        │ nome              │
-│ data_nascimento   │        │ id_plano (FK) ────────┼───────►│ preco             │
-│ telefone          │        │ data_inicio           │        │ duracao_meses     │
-│ ativo             │        │ data_fim_estimada     │        └───────────────────┘
-└───────────────────┘        │ status                │
-                             └───────────────────────┘
+\`\`\`text
++------------------+ +----------------------+ +-------------------+
+| ALUNOS | | MATRÍCULAS | | PLANOS |
++------------------+ +----------------------+ +-------------------+
+| id (PK) |<-------1| id (PK) | | id (PK) |
+| nome | | id_aluno (FK) | | nome |
+| data_nascimento | | id_plano (FK) |-------->| preco |
+| telefone | | data_inicio | | duracao_meses |
++------------------+ | data_fim_estimada | +-------------------+
+| status |
++----------------------+
 
++-----------------------+
+|       USUARIOS        |   Tabela independente: controla quem acessa o sistema.
++-----------------------+
+| id (PK)               |
+| nome                  |
+| login (único)         |
+| senha_hash            |
+| perfil                |   'admin' ou 'recepcao'
+| ativo                 |
+| criado_em             |
++-----------------------+
 ```
-### Tabela `alunos`
 
-| Coluna             | Tipo         | Restrições                  | Descrição                          |
-|--------------------|--------------|------------------------------|-------------------------------------|
-| `id`               | SERIAL       | PK                            | Identificador único                 |
-| `nome`             | VARCHAR(100) | NOT NULL                      | Nome completo do aluno               |
-| `data_nascimento`  | DATE         | NOT NULL                      | Data de nascimento                   |
-| `telefone`         | VARCHAR(20)  | —                              | Telefone de contato (opcional)       |
-| `ativo`            | BOOLEAN      | DEFAULT TRUE                  | Indica se o cadastro está ativo      |
-
-### Tabela `planos`
-
-| Coluna           | Tipo          | Restrições | Descrição                          |
-|------------------|---------------|------------|--------------------------------------|
-| `id`             | SERIAL        | PK         | Identificador único                  |
-| `nome`           | VARCHAR(50)   | NOT NULL   | Nome do plano (ex: Fit, Mister)      |
-| `preco`          | NUMERIC(10,2) | NOT NULL   | Valor mensal do plano                |
-| `duracao_meses`  | INTEGER       | NOT NULL   | Duração do plano em meses            |
-
-### Tabela `matriculas`
-
-| Coluna               | Tipo         | Restrições                                      | Descrição                                   |
-|----------------------|--------------|--------------------------------------------------|-----------------------------------------------|
-| `id`                 | SERIAL       | PK                                                 | Identificador único                           |
-| `id_aluno`           | INTEGER      | FK → `alunos.id`, NOT NULL                         | Aluno matriculado                             |
-| `id_plano`           | INTEGER      | FK → `planos.id`, NOT NULL                         | Plano contratado                              |
-| `data_inicio`        | DATE         | NOT NULL                                           | Data de início da matrícula                   |
-| `data_fim_estimada`  | DATE         | NOT NULL                                           | Calculada a partir de `data_inicio` + duração |
-| `status`             | VARCHAR(20)  | NOT NULL, DEFAULT `'ativa'`, CHECK (`ativa`/`inativa`) | Status base da matrícula                      |
-
-> O status exibido na interface (`Ativa`, `Vencida`, `Inativa`) é calculado
-> dinamicamente comparando `data_fim_estimada` com a data atual — não é uma
-> coluna separada.
+A tabela `usuarios` é criada automaticamente no primeiro acesso. Ela não se
+relaciona com as demais: o controle de acesso é feito pelo `perfil` do usuário
+logado.

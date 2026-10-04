@@ -1,4 +1,4 @@
-import type { Plano, MatriculaComNomes, AlunoListado } from './types'
+import type { Plano, MatriculaComNomes, AlunoListado, Sessao } from './types'
 
 export let cacheAlunos: AlunoListado[] = []
 export let cachePlanos: Plano[] = []
@@ -20,6 +20,27 @@ export let planoSelecionadoParaMatricula: number | null = null
 
 export function setPlanoSelecionadoParaMatricula(id: number | null): void {
   planoSelecionadoParaMatricula = id
+}
+
+// Só serve para ESCONDER botões e telas. Quem barra de verdade é o main.
+export let sessao: Sessao | null = null
+
+export function setSessao(nova: Sessao | null): void {
+  sessao = nova
+}
+
+export function podeFazer(acao: string): boolean {
+  const permissoes = sessao?.permissoes ?? []
+  return permissoes.includes('*') || permissoes.includes(acao)
+}
+
+// Chamado no logout: nada da sessão anterior pode sobrar na memória.
+export function limparEstado(): void {
+  cacheAlunos = []
+  cachePlanos = []
+  cacheMatriculas = []
+  planoSelecionadoParaMatricula = null
+  sessao = null
 }
 
 export function irParaView(nomeView: string): void {

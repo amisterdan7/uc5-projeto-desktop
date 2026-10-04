@@ -1,5 +1,6 @@
 @import './base.css';
 @import './toast.css';
+@import './auth.css';
 
 * {
   box-sizing: border-box;

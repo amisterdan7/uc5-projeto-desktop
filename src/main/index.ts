@@ -17,7 +17,9 @@ import {
   atualizarStatusMatricula,
   excluirMatricula
 } from './db/matriculas_repository'
-import { comTratamento, registrarErro } from './erros'
+import { registrarErro } from './erros'
+import { comAcesso } from './auth/sessao'
+import { registrarIpcAuth } from './auth/ipc'
 import dns from 'dns'
 
 dns.setDefaultResultOrder('ipv4first')
@@ -77,7 +79,8 @@ function buildMenu(): void {
       submenu: [
         { role: 'reload' },
         { role: 'forceReload' },
-        { role: 'toggleDevTools' },
+        // Console do navegador só em desenvolvimento: em produção ele burlaria a tela de login.
+        ...(is.dev ? [{ role: 'toggleDevTools' as const }] : []),
         { type: 'separator' },
         { role: 'resetZoom' },
         { role: 'zoomIn' },
@@ -101,105 +104,104 @@ function buildMenu(): void {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
-app.whenReady().then(async () => {
-  electronApp.setAppUserModelId('com.amisterdan7.academiamisterfit')
+const gotTheLock = app.requestSingleInstanceLock()
 
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
-  ipcMain.handle('alunos:desativar', async (_e, id) => {
-    try {
-      return { success: true, data: await desativarAlunoTemporariamente(id) }
-    } catch (error) {
-      return { success: false, error: (error as Error).message }
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    const mainWindow = BrowserWindow.getAllWindows()[0]
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
     }
   })
 
-  ipcMain.handle('alunos:reativar', async (_e, id) => {
+  app.whenReady().then(async () => {
+    electronApp.setAppUserModelId('com.amisterdan7.academiamisterfit')
+
+    app.on('browser-window-created', (_, window) => {
+      optimizer.watchWindowShortcuts(window)
+    })
+
     try {
-      return { success: true, data: await reativarAluno(id) }
-    } catch (error) {
-      return { success: false, error: (error as Error).message }
+      await testConnection()
+    } catch (erro) {
+      console.error('Falha ao conectar no banco na inicialização:', erro)
+      registrarErro('inicializacao', erro)
     }
-  })
 
-  try {
-    await testConnection()
-  } catch (erro) {
-    console.error('Falha ao conectar no banco na inicialização:', erro)
-    registrarErro('inicializacao', erro)
-  }
+    // Login, logout, sessão e gestão de usuários
+    registrarIpcAuth()
 
-  ipcMain.handle('db:test-connection', () =>
-    comTratamento('db:test-connection', async () => await testConnection())
-  )
+    // A partir daqui, TODO handler passa por comAcesso: sem login ou sem permissão, nada executa.
+    ipcMain.handle('db:test-connection', () =>
+      comAcesso('db:test-connection', async () => await testConnection())
+    )
 
-  ipcMain.handle('alunos:criar', (_e, aluno) =>
-    comTratamento('alunos:criar', async () => await criarAluno(aluno))
-  )
+    // Alunos
+    ipcMain.handle('alunos:criar', (_e, aluno) =>
+      comAcesso('alunos:criar', async () => await criarAluno(aluno))
+    )
+    ipcMain.handle('alunos:listar', () =>
+      comAcesso('alunos:listar', async () => await listarAlunos())
+    )
+    ipcMain.handle('alunos:atualizar', (_e, id, aluno) =>
+      comAcesso('alunos:atualizar', async () => await atualizarAluno(id, aluno))
+    )
+    ipcMain.handle('alunos:excluir', (_e, id) =>
+      comAcesso('alunos:excluir', async () => await excluirAluno(id))
+    )
+    ipcMain.handle('alunos:desativar', (_e, id) =>
+      comAcesso('alunos:desativar', async () => await desativarAlunoTemporariamente(id))
+    )
+    ipcMain.handle('alunos:reativar', (_e, id) =>
+      comAcesso('alunos:desativar', async () => await reativarAluno(id))
+    )
 
-  ipcMain.handle('alunos:listar', () =>
-    comTratamento('alunos:listar', async () => await listarAlunos())
-  )
+    // Planos
+    ipcMain.handle('planos:criar', (_e, plano) =>
+      comAcesso('planos:criar', async () => await criarPlano(plano))
+    )
+    ipcMain.handle('planos:listar', () =>
+      comAcesso('planos:listar', async () => await listarPlanos())
+    )
+    ipcMain.handle('planos:atualizar', (_e, id, plano) =>
+      comAcesso('planos:atualizar', async () => await atualizarPlano(id, plano))
+    )
+    ipcMain.handle('planos:excluir', (_e, id) =>
+      comAcesso('planos:excluir', async () => await excluirPlano(id))
+    )
 
-  ipcMain.handle('alunos:atualizar', (_e, id, aluno) =>
-    comTratamento('alunos:atualizar', async () => await atualizarAluno(id, aluno))
-  )
+    // Matrículas
+    ipcMain.handle('matriculas:criar', (_e, matricula) =>
+      comAcesso('matriculas:criar', async () => await criarMatricula(matricula))
+    )
+    ipcMain.handle('matriculas:listar', () =>
+      comAcesso('matriculas:listar', async () => await listarMatriculas())
+    )
+    ipcMain.handle('matriculas:atualizar-status', (_e, id, status) =>
+      comAcesso('matriculas:atualizar-status', async () => {
+        await atualizarStatusMatricula(id, status)
+      })
+    )
+    ipcMain.handle('matriculas:excluir', (_e, id) =>
+      comAcesso('matriculas:excluir', async () => {
+        await excluirMatricula(id)
+      })
+    )
 
-  ipcMain.handle('alunos:excluir', (_e, id) =>
-    comTratamento('alunos:excluir', async () => await excluirAluno(id))
-  )
+    buildMenu()
+    createWindow()
 
-  ipcMain.handle('planos:criar', (_e, plano) =>
-    comTratamento('planos:criar', async () => await criarPlano(plano))
-  )
-
-  ipcMain.handle('planos:listar', () =>
-    comTratamento('planos:listar', async () => await listarPlanos())
-  )
-
-  ipcMain.handle('planos:atualizar', (_e, id, plano) =>
-    comTratamento('planos:atualizar', async () => await atualizarPlano(id, plano))
-  )
-
-  ipcMain.handle('planos:excluir', (_e, id) =>
-    comTratamento('planos:excluir', async () => await excluirPlano(id))
-  )
-
-  ipcMain.handle('matriculas:criar', (_e, matricula) =>
-    comTratamento('matriculas:criar', async () => await criarMatricula(matricula))
-  )
-
-  ipcMain.handle('matriculas:listar', () =>
-    comTratamento('matriculas:listar', async () => await listarMatriculas())
-  )
-
-  ipcMain.handle('matriculas:atualizar-status', (_e, id, status) =>
-    comTratamento('matriculas:atualizar-status', async () => {
-      await atualizarStatusMatricula(id, status)
+    app.on('activate', function () {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
-  )
-
-  ipcMain.handle('matriculas:excluir', (_e, id) =>
-    comTratamento('matriculas:excluir', async () => {
-      await excluirMatricula(id)
-    })
-  )
-
-  buildMenu()
-  createWindow()
-
-  app.on('activate', function () {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
-})
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
-})
-
-app.on('before-quit', () => {
-  console.log('Encerrando aplicação...')
 })

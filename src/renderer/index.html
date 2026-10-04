@@ -5,13 +5,154 @@
     <title>Academia MisterFit</title>
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:"
     />
     <link href="./assets/main.css" type="text/css" rel="stylesheet" />
   </head>
 
   <body>
-    <div id="app">
+    <!-- TELA DE ACESSO: a primeira coisa que qualquer pessoa vê -->
+    <section id="view-login" class="login">
+      <aside class="login-marca">
+        <div class="login-marca-topo">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M6 5v14M18 5v14M2 9v6M22 9v6M6 12h12" />
+          </svg>
+          <span>Academia MisterFit</span>
+        </div>
+
+        <div class="login-marca-texto">
+          <h2>Planos, matrículas e alunos no mesmo painel.</h2>
+          <p>Administradores gerenciam tudo. A recepção consulta e cadastra.</p>
+        </div>
+
+        <svg class="login-halteres" viewBox="0 0 600 220" fill="currentColor" aria-hidden="true">
+          <rect x="0" y="100" width="600" height="20" rx="4" />
+          <rect x="70" y="20" width="34" height="180" rx="10" />
+          <rect x="110" y="42" width="28" height="136" rx="9" />
+          <rect x="144" y="62" width="22" height="96" rx="8" />
+          <rect x="172" y="92" width="12" height="36" rx="3" />
+          <rect x="496" y="20" width="34" height="180" rx="10" />
+          <rect x="462" y="42" width="28" height="136" rx="9" />
+          <rect x="434" y="62" width="22" height="96" rx="8" />
+          <rect x="416" y="92" width="12" height="36" rx="3" />
+        </svg>
+      </aside>
+
+      <div class="login-acesso">
+        <div class="login-card">
+          <p id="login-verificando" class="login-status">Verificando sessão…</p>
+
+          <div id="login-falha" hidden>
+            <h1>Não foi possível continuar</h1>
+            <p id="login-falha-msg" class="login-sub"></p>
+            <button type="button" id="btn-tentar-novamente" class="btn btn-primary w-full">
+              Tentar novamente
+            </button>
+          </div>
+
+          <form id="form-login" hidden>
+            <div>
+              <h1>Entrar</h1>
+              <p class="login-sub">Use o usuário e a senha fornecidos pela academia.</p>
+            </div>
+
+            <div class="campo">
+              <label for="login-usuario">Usuário</label>
+              <input
+                id="login-usuario"
+                class="form-input"
+                type="text"
+                autocomplete="username"
+                autocapitalize="off"
+                spellcheck="false"
+              />
+            </div>
+
+            <div class="campo">
+              <label for="login-senha">Senha</label>
+              <div class="campo-senha">
+                <input
+                  id="login-senha"
+                  class="form-input"
+                  type="password"
+                  autocomplete="current-password"
+                />
+                <button type="button" id="login-ver-senha" class="login-ver" aria-pressed="false">
+                  Mostrar
+                </button>
+              </div>
+            </div>
+
+            <p id="login-erro" class="login-erro" role="alert" hidden></p>
+
+            <button type="submit" class="btn btn-primary w-full">Entrar</button>
+            <p class="login-ajuda">Sem acesso? Peça a um administrador.</p>
+          </form>
+
+          <form id="form-setup" hidden>
+            <div>
+              <h1>Primeiro acesso</h1>
+              <p class="login-sub">
+                Crie o administrador. É ele quem vai cadastrar os demais usuários.
+              </p>
+            </div>
+
+            <div class="campo">
+              <label for="setup-nome">Nome completo</label>
+              <input id="setup-nome" class="form-input" type="text" autocomplete="name" />
+            </div>
+
+            <div class="campo">
+              <label for="setup-usuario">Usuário</label>
+              <input
+                id="setup-usuario"
+                class="form-input"
+                type="text"
+                autocomplete="username"
+                autocapitalize="off"
+                spellcheck="false"
+              />
+            </div>
+
+            <div class="campo">
+              <label for="setup-senha">Senha (mínimo de 8 caracteres)</label>
+              <input
+                id="setup-senha"
+                class="form-input"
+                type="password"
+                autocomplete="new-password"
+              />
+            </div>
+
+            <div class="campo">
+              <label for="setup-confirmar">Repita a senha</label>
+              <input
+                id="setup-confirmar"
+                class="form-input"
+                type="password"
+                autocomplete="new-password"
+              />
+            </div>
+
+            <p id="setup-erro" class="login-erro" role="alert" hidden></p>
+
+            <button type="submit" class="btn btn-primary w-full">Criar administrador</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <div id="app" hidden>
       <!-- SIDEBAR -->
       <aside class="sidebar">
         <div class="sidebar-brand">
@@ -66,6 +207,18 @@
             </svg>
             Área do Aluno
           </button>
+
+          <button class="nav-item" data-view="usuarios" data-requer="usuarios:listar" hidden>
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
+            </svg>
+            Usuários
+          </button>
         </nav>
 
         <div class="sidebar-footer">
@@ -81,8 +234,12 @@
             Sistema operacional
           </div>
           <div class="user-profile">
-            <div class="avatar">AM</div>
-            <span>Administrador</span>
+            <div class="avatar" id="avatar-usuario"></div>
+            <div class="user-info">
+              <span id="nome-usuario"></span>
+              <small id="perfil-usuario"></small>
+            </div>
+            <button type="button" id="btn-sair" class="btn btn-outline btn-sm">Sair</button>
           </div>
         </header>
 
@@ -93,7 +250,9 @@
                 <span class="tag-contexto">GESTÃO DE MEMBROS</span>
                 <h1>Alunos</h1>
               </div>
-              <button id="btn-novo-aluno" class="btn btn-primary">+ Novo Aluno</button>
+              <button id="btn-novo-aluno" class="btn btn-primary" data-requer="alunos:criar">
+                + Novo Aluno
+              </button>
             </header>
 
             <p id="aviso-plano-selecionado" class="empty-state" hidden></p>
@@ -201,7 +360,13 @@
                 <span class="tag-contexto">OPERAÇÃO</span>
                 <h1>Matrículas</h1>
               </div>
-              <button id="btn-nova-matricula" class="btn btn-primary">+ Nova Matrícula</button>
+              <button
+                id="btn-nova-matricula"
+                class="btn btn-primary"
+                data-requer="matriculas:criar"
+              >
+                + Nova Matrícula
+              </button>
             </header>
 
             <form id="form-matricula" class="card" hidden>
@@ -266,6 +431,93 @@
                   </tr>
                 </thead>
                 <tbody id="tabela-matriculas-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- 5. VIEW: USUÁRIOS (somente administrador) -->
+          <section class="view" id="view-usuarios" hidden>
+            <header class="content-header view-header-actions">
+              <div>
+                <span class="tag-contexto">ACESSO</span>
+                <h1>Usuários</h1>
+              </div>
+              <button id="btn-novo-usuario" class="btn btn-primary">+ Novo Usuário</button>
+            </header>
+
+            <form id="form-usuario" class="card" hidden>
+              <div class="card-header">
+                <svg width="20" height="20" fill="none" stroke="var(--primary)" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                  ></path>
+                </svg>
+                Cadastrar usuário
+              </div>
+
+              <div class="form-grid">
+                <div class="campo">
+                  <label for="usuario-nome">Nome completo</label>
+                  <input id="usuario-nome" class="form-input" type="text" required />
+                </div>
+
+                <div class="campo">
+                  <label for="usuario-login">Usuário</label>
+                  <input
+                    id="usuario-login"
+                    class="form-input"
+                    type="text"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    required
+                  />
+                </div>
+
+                <div class="campo">
+                  <label for="usuario-senha">Senha (mínimo de 8 caracteres)</label>
+                  <input
+                    id="usuario-senha"
+                    class="form-input"
+                    type="password"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required
+                  />
+                </div>
+
+                <div class="campo">
+                  <label for="usuario-perfil">Perfil</label>
+                  <select id="usuario-perfil" class="form-input">
+                    <option value="recepcao">Recepção</option>
+                    <option value="admin">Administrador</option>
+                  </select>
+                </div>
+
+                <div class="form-actions-inline" style="grid-column: 1 / -1">
+                  <button type="button" id="btn-cancelar-usuario" class="btn btn-outline">
+                    Cancelar
+                  </button>
+                  <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+              </div>
+            </form>
+
+            <div class="table-container">
+              <table id="tabela-usuarios">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Usuário</th>
+                    <th>Perfil</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tabela-usuarios-body"></tbody>
               </table>
             </div>
           </section>

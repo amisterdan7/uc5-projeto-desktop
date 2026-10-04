@@ -2,12 +2,32 @@ import { app } from 'electron'
 import fs from 'fs'
 import path from 'path'
 
-export type AppError = { message: string }
+export type AppError = { message: string; code?: string }
 export type ApiOk<T> = { success: true; data: T }
 export type ApiFail = { success: false; error: AppError }
 export type ApiResult<T> = ApiOk<T> | ApiFail
 
-export class ErroValidacao extends Error {}
+// Erro "esperado": a mensagem é mostrada ao usuário como está.
+export class ErroValidacao extends Error {
+  code?: string
+
+  constructor(message: string, code?: string) {
+    super(message)
+    this.code = code
+  }
+}
+
+export class ErroNaoAutenticado extends ErroValidacao {
+  constructor() {
+    super('Faça login para continuar.', 'NAO_AUTENTICADO')
+  }
+}
+
+export class ErroSemPermissao extends ErroValidacao {
+  constructor() {
+    super('Você não tem permissão para realizar esta ação.', 'SEM_PERMISSAO')
+  }
+}
 
 export function mensagemAmigavel(erro: unknown): string {
   const codigo = (erro as { code?: string } | null)?.code
@@ -46,7 +66,7 @@ export async function comTratamento<T>(
     return { success: true, data }
   } catch (erro) {
     if (erro instanceof ErroValidacao) {
-      return { success: false, error: { message: erro.message } }
+      return { success: false, error: { message: erro.message, code: erro.code } }
     }
 
     registrarErro(origem, erro)

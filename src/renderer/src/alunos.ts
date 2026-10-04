@@ -4,7 +4,8 @@ import {
   setCacheAlunos,
   planoSelecionadoParaMatricula,
   setPlanoSelecionadoParaMatricula,
-  irParaView
+  irParaView,
+  podeFazer
 } from './state'
 import { exibirMensagemTabela, mostrarToast } from './utils'
 import { continuarParaMatricula, iniciarMatriculaParaAluno } from './matriculas'
@@ -96,7 +97,6 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
   alunos.forEach((aluno) => {
     const tr = document.createElement('tr')
 
-    // --- NOVIDADE 1: Efeito fantasma na linha ---
     if (aluno.ativo === false) {
       tr.classList.add('linha-arquivada')
     }
@@ -110,7 +110,6 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
     const tdPlano = document.createElement('td')
     tdPlano.textContent = aluno.plano_nome ?? '-'
 
-    // --- STATUS (BADGE) ---
     const tdStatus = document.createElement('td')
     const badge = document.createElement('span')
 
@@ -129,19 +128,18 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
 
     if (aluno.ativo === false) {
       badge.className = 'badge badge-inativa'
-      badge.textContent = 'Arquivado' // Mudamos de "Desativado" para "Arquivado"
+      badge.textContent = 'Arquivado'
     } else {
       badge.className = `badge ${classePorStatus[aluno.status_matricula] ?? 'badge-inativa'}`
       badge.textContent = textoPorStatus[aluno.status_matricula] ?? aluno.status_matricula
     }
     tdStatus.appendChild(badge)
 
-    // --- COLUNA DE AÇÕES ---
     const tdAcoes = document.createElement('td')
     tdAcoes.style.display = 'flex'
-    tdAcoes.style.gap = '8px' // Mais espaço para respirar
+    tdAcoes.style.gap = '8px'
 
-    // 1. Botão Editar (Igual ao seu)
+    // 1. Botão Editar
     const btnEditar = document.createElement('button')
     btnEditar.className = 'btn-icon'
     btnEditar.title = 'Editar Aluno'
@@ -193,7 +191,7 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
       })
     } else {
       btnStatus.title = 'Arquivar aluno'
-      // Ícone de "Caixa de Arquivo"
+
       btnStatus.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>`
       btnStatus.addEventListener('click', async () => {
         if (confirm(`Deseja arquivar os dados de ${aluno.nome}?`)) {
@@ -203,7 +201,6 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
       })
     }
 
-    // 3. Botão Excluir Permanente
     const btnExcluir = document.createElement('button')
     btnExcluir.className = 'btn-icon danger'
     btnExcluir.title = 'Excluir Permanentemente'
@@ -220,12 +217,9 @@ function renderizarTabelaAlunos(alunos: AlunoListado[], buscaAtiva: boolean): vo
       }
     })
 
-    tdAcoes.appendChild(btnEditar)
-    tdAcoes.appendChild(btnStatus)
-
-    if (aluno.ativo === false) {
-      tdAcoes.appendChild(btnExcluir)
-    }
+    if (podeFazer('alunos:atualizar')) tdAcoes.appendChild(btnEditar)
+    if (podeFazer('alunos:desativar')) tdAcoes.appendChild(btnStatus)
+    if (aluno.ativo === false && podeFazer('alunos:excluir')) tdAcoes.appendChild(btnExcluir)
 
     tr.appendChild(tdNome)
     tr.appendChild(tdTelefone)

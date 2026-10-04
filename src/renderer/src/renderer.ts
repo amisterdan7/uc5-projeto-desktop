@@ -1,6 +1,9 @@
 import { initFormAluno, initFiltroAlunos, carregarAlunos } from './alunos'
 import { carregarPlanos } from './planos'
 import { initToggleFormMatricula, initFormMatricula, carregarMatriculas } from './matriculas'
+import { initUsuarios, carregarUsuarios } from './usuarios'
+import { initAuth } from './auth'
+import { podeFazer } from './state'
 
 function initNavigation(): void {
   const navItems = document.querySelectorAll<HTMLButtonElement>('.nav-item')
@@ -32,10 +35,15 @@ function init(): void {
     initFormMatricula()
     initFormAluno()
     initFiltroAlunos()
+    initUsuarios()
 
-    await carregarPlanos()
-    await carregarAlunos()
-    await carregarMatriculas()
+    // Nada de dados é carregado antes do login: o main recusaria mesmo.
+    await initAuth(async () => {
+      await carregarPlanos()
+      await carregarAlunos()
+      await carregarMatriculas()
+      if (podeFazer('usuarios:listar')) await carregarUsuarios()
+    })
   })
 }
 

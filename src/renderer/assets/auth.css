@@ -1,9 +1,3 @@
-/* ==========================================================================
-   Tela de acesso, usuário na topbar e gestão de usuários.
-   Usa só os tokens que já existem no base.css (--primary, --card, --border...).
-   ========================================================================== */
-
-/* ---------- Tela de acesso ---------- */
 .login {
   position: fixed;
   inset: 0;
@@ -13,7 +7,6 @@
   background-color: var(--background);
 }
 
-/* Painel da marca: laranja chapado, texto escuro (contraste bem melhor que branco sobre #ff5b24) */
 .login-marca {
   position: relative;
   display: flex;
@@ -51,7 +44,7 @@
   line-height: 1.5;
 }
 
-/* A barra com anilhas sangra para fora do painel, levemente inclinada */
+
 .login-halteres {
   flex: none;
   width: calc(100% + 96px);
@@ -62,7 +55,7 @@
   pointer-events: none;
 }
 
-/* Lado do formulário */
+
 .login-acesso {
   display: flex;
   align-items: center;
@@ -116,8 +109,7 @@
   font-size: 0.85rem;
 }
 
-/* ---------- Campo de formulário (login e usuários) ---------- */
-/* Classe própria de propósito: ".field input" do main.css depende de variáveis --ev-c-* */
+
 .campo {
   display: flex;
   flex-direction: column;
@@ -170,7 +162,6 @@
   cursor: wait;
 }
 
-/* ---------- Usuário na topbar ---------- */
 .user-info {
   display: flex;
   flex-direction: column;
@@ -188,7 +179,6 @@
   font-size: 0.8rem;
 }
 
-/* ---------- Gestão de usuários ---------- */
 .badge-admin {
   background-color: rgba(255, 91, 36, 0.15);
   color: var(--primary);
@@ -199,7 +189,6 @@
   color: var(--chart-5);
 }
 
-/* Em janelas estreitas o painel da marca sai e sobra só o formulário */
 @media (max-width: 700px) {
   .login {
     grid-template-columns: 1fr;
